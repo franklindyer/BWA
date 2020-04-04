@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Title</title>
+		<link rel="stylesheet" href="/css/style.css">
+	</head>
+	
+	<body>
+	
+		<div id="everything">
+	
+			<!--<h1>Hello, multiverse.</h1>-->
+			
+			<div id="battlefield">
+			
+				<div class="separate_layer">
+					<div class="name_tag" id="player_name">Lex</div>
+					<div class="name_tag" id="enemy_name">Baddi-boi</div>
+				</div>
+			
+				<div class="separate_layer">
+					<div class="health_bar" id="player_health">25</div>	<div class="health_bar" id="enemy_health">40</div>
+				</div>
+			
+				<img id="player_img" src="/img/lex.png"></img>
+				
+				<table id="selected_grid"><tr id="selected_tiles">
+					<td class="grid_selected">b</td>
+				</tr></table>
+				
+				<div id="enemy_display">
+				
+					<div class="speechbubble" id="enemy_speechbubble"></div>
+				
+					<img id="enemy_img"></img>
+				
+				</div>
+				
+				<div class="separate_layer" id="effect_table">
+			
+					<table id="player_effect_table">
+						<tr id="player_effects"></tr>
+					</table>
+					
+					<table id="enemy_effect_table">
+						<tr id="enemy_effects"></tr>
+					</table>
+					
+				</div>
+			
+			</div>
+			
+			<table id="lower_stage"><tr>
+				
+				<td class="lower_section"></td>
+				
+				<td class = "lower_section" id="lower_center">
+				
+				<div id="block_grid"><p id="block_grid_text"></p></div>	
+					
+					<table id="letter_grid">
+						<tr>
+							<td id="grid0" class="grid">a</td>
+							<td id="grid1" class="grid">b</td>
+							<td id="grid2" class="grid">c</td>
+							<td id="grid3" class="grid">d</td>
+						</tr>
+						<tr>
+							<td id="grid4" class="grid">e</td>
+							<td id="grid5" class="grid">f</td>
+							<td id="grid6" class="grid">g</td>
+							<td id="grid7" class="grid">h</td>
+						</tr>
+						<tr>
+							<td id="grid8" class="grid">i</td>
+							<td id="grid9" class="grid">j</td>
+							<td id="grid10" class="grid">k</td>
+							<td id="grid11" class="grid">l</td>
+						</tr>
+						<tr>
+							<td id="grid12" class="grid">m</td>
+							<td id="grid13" class="grid">n</td>
+							<td id="grid14" class="grid">o</td>
+							<td id="grid15" class="grid">p</td>
+						</tr>
+					</table>
+					
+					<button id="submit_word">ATTACK!</button>
+					
+					<button id="scramble">Scramble</button>
+					
+					<button id="skip_turn">Skip turn</button>
+				
+				</td>
+				
+				<td class="lower_section">
+				
+					<table id="enemy_info"></table>
+				
+				</td>
+						
+			</tr></table>
+		
+		</div>
+		
+		<script src="/js/battle.js"></script>
+		<script src="/js/enemy_library.json"></script>
+		<script> 
+			if (enemy_library.{{ enemyid }}) {
+				for (att in enemy_library.{{ enemyid }}) { Model.enemy[att] = enemy_library.{{ enemyid }}[att]; } 
+			} else {
+				for (att in enemy_library.j404) { Model.enemy[att] = enemy_library.j404[att]; } 
+			}
+		</script>
+		<script src="/js/initialize.js"></script>
+		
+	</body>
+	
+</html>

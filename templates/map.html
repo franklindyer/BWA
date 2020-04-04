@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Title</title>
+	<style type="text/css">
+	
+		body {
+			background-color: black;
+		}
+		
+		#everything {
+			width: 750px;
+			height: 600px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+		
+		#adventure_text {
+			text-align: center;
+			border: 3px solid #663300;
+			background-color: #b35900;
+			color: #ffcc00;
+			padding: 30px;
+			font-family: Arial;
+		}
+		
+		#chap_title {
+			font-weight: bold;
+			font-size: 30px;
+		}
+		
+		#chap_description {
+			font-size: 15px;
+		}
+		
+		button {
+			background-color: #4CAF50;
+			border: none;
+			color: white;
+			padding: 5px 10px;
+			text-align: center;
+			text-decoration: none;
+			display: inline-block;
+			font-size: 25px;
+			font-family: Copperplate;
+		}
+	
+	</style>
+	</head>
+	
+	<body>
+
+	<div id="everything">
+		<div id="adventure_text">
+			<t1 id="chap_title"></t1>
+			<p id="chap_description"></p>
+			<button>Let's go!</button>
+		</div>
+	</div>
+	
+	<script src="/js/traveltext_library.json"></script>
+	<script>
+		chap_des = document.getElementById("chap_description");
+		chap_tit = document.getElementById("chap_title");
+		tt_id = localStorage.getItem("bwa_chapter");
+		chap_des.innerHTML = travel_text[tt_id].description;
+		chap_tit.innerHTML = travel_text[tt_id].name;
+		next_enemy = localStorage.getItem("next_enemy_id");
+		
+		go_button = document.querySelector("button");
+		go_button.addEventListener("click", () => {
+			window.location.replace("/enemy/"+next_enemy);
+		})
+	</script>
+	
+	</body>
+	
+</html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Title</title>
+	<style type="text/css">
+	
+		.centerme {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			-moz-transform: translateX(-50%) translateY(-50%);
+			-webkit-transform: translateX(-50%) translateY(-50%);
+			transform: translateX(-50%) translateY(-50%);
+			text-align: center;
+		}
+			
+		#title {
+			height: 200px;
+		}
+	
+	</style>
+	
+	<script>
+	
+		function go_to_game() {
+			savefile = JSON.parse(localStorage.getItem("savefile"));
+			if (savefile) {
+				window.location.replace("/enemy/"+String(savefile.current_enemy));
+			} else {
+				window.location.replace("/enemy/e11");
+			}
+		}
+		
+		function erase_savefile() {
+			localStorage.removeItem("savefile");
+			localStorage.removeItem("bwa_chapter");
+			localStorage.removeItem("next_enemy_id");
+		}
+		
+	</script>
+	
+	</head>
+	
+	<body>
+	
+		<div class="centerme">
+			<img src="/img/bookworm_adventures.png" id="title"></img>
+			<div>
+				<button onclick="go_to_game()">Continue game</button>
+				<button onclick="erase_savefile()">Reset game</button>
+			</div>
+		</div>
+	
+	</body>
+	
+</html>

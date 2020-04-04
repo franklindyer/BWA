@@ -1,0 +1,13 @@
+travel_text = {
+
+	"1": {
+		name: "Chapter 1: Among the cabbages",
+		description: "Lex finds himself in the idyllic garden of a countryside cottage. Several furry critters have come to partake in its juicy cabbages, including... a cat wearing clothes?"
+	},
+	
+	"2": {
+		name: "Chapter 2: Sherwood Forest",
+		description: "Eager to leave the perilous patch of cabbages, Lex hurries down a well-trodden path through the woods. Unfortunately, his journey is instantly impeded by hostile highway hooligans."
+	} 
+
+}

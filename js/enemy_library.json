@@ -1,0 +1,172 @@
+enemy_library = {
+
+	t1: {
+	
+		id: "t1",
+		next_enemy_id: "t2",
+		name: "Cujo",
+		height: "200px",
+		full_hp: 40,
+		attacks: [
+			new Attack("Bite",0.4,2, { bleed: 2 }), 
+			new Attack("Mangy breath",0.3,4,{ poison: 2, burn: 2 }),
+			new Attack("Hearty growl",0.3,0,{ regenerate: 5, powerup: 2, powerdown: 2 })
+		],
+		flavortext: "This devil-dog from hell is the mangiest mangy-boi you'll ever meet. Guard your jugular. Plus... he has fire breath? WTF?!"
+	
+	},
+	
+	t2: {
+	
+		id: "t2",
+		next_enemy_id: "t1",
+		name: "The Owl and the Pussy-Cat",
+		height: "200px",
+		full_hp: 30,
+		attacks: [
+			new Attack("Runcible spoon",0.4,1, { stun: 2 }), 
+			new Attack("Cat scratch",0.3,2,{ bleed: 2 }),
+			new Attack("Hoot hoot",0.3,0,{ powerup: 3, tilealter: 3 })
+		],
+		flavortext: "You elegant fowl! How charmingly sweet you sing! O let us be married! too long we have tarried: but what shall we do for a ring?"
+	
+	},
+	
+	j404: {
+	
+		id: "j404",
+		next_enemy_id: "j404",
+		name: "This enemy does not exist",
+		height: "180px",
+		width: "170px",
+		full_hp: 404404,
+		attacks: [
+			new Attack("404 attack not found",1,404)
+		],
+		flavortext: "Hey, what do you think you're doing, trying to look at enemies that don't exist? Get outta here!"
+	
+	},
+	
+	e11: {
+	
+		id: "e11",
+		next_enemy_id: "e12",
+		name: "Squirrel Nutkin",
+		height: "150px",
+		width: "110px",
+		full_hp: 15,
+		attacks: [
+			new Attack("Scratch",0.6,1),
+			new Attack("Nut toss",0.4,2)
+		],
+		flavortext: "The squirrels searched for nuts all over the island and filled their little sacks. But Nutkin gathered oak-apples - yellow and scarlet - and sat upon a beech-stump playing marbles...",
+		quips: [
+			"Riddle-me, riddle-me, rot-tot-tote!",
+			"Hum-a-bum! Buzz! Buzz!",
+			"Cuck-cuck-cuck-cur-r-r-cuck-k-k!"
+		]
+	
+	},
+	
+	e12: {
+	
+		id: "e12",
+		next_enemy_id: "e13",
+		name: "Tom Kitten",
+		height: "160px",
+		width: "125px",
+		full_hp: 20,
+		attacks: [
+			new Attack("Scratch",0.6,2),
+			new Attack("Button Burst",0.4,2,{ stun:2 })
+		],
+		flavortext: "Tom Kitten was very fat, and he had grown; several buttons burst off. His mother sewed them on again.",
+		quips: [
+			"Meow."
+		]
+	},
+	
+	e13: {
+	
+		id: "e13",
+		next_enemy_id: "e14",
+		name: "Peter Rabbit",
+		height: "150px",
+		width: "90px",
+		full_hp: 20,
+		attacks: [
+			new Attack("Nibble",0.5,1),
+			new Attack("Cabbage Chomp",0.5,1,{ regenerate:4 })
+		],
+		flavortext: "Flopsy, Mopsy, and Cotton-tail, who were good little bunnies, went down the lane to gather blackberries. But Peter, who was very naughty, ran straight away to Mr. McGregor's garden, and squeezed under the gate!",
+		quips: [
+			"Where'd ya get the classy bowtie, my dude?",
+			"*Crunch* *crunch*",
+			"Sweet shades, homie."
+		]
+	
+	},
+	
+	e14: {
+	
+		id: "e14",
+		next_enemy_id: "e15",
+		name: "Mrs. Tiggy-Winkle",
+		height: "150px",
+		width: "140px",
+		full_hp: 25,
+		attacks: [
+			new Attack("Prick",0.7,3),
+			new Attack("Sweep away",0.3,2,{ stun: 2 })
+		],
+		flavortext: "Lily-white and clean, oh! / With little frills between, oh! / Smooth and hot - red rusty spot / never here be seen, oh!",
+		quips: [
+			"Lily-white and clean, oh!",
+			"Now where did I leave that pocket-handkin?"
+		]
+	
+	},
+	
+	e15: {
+	
+		id: "e15",
+		next_enemy_id: "e21",
+		name: "Mr. McGregor (Boss)",
+		height: "150px",
+		width: "210px",
+		full_hp: 30,
+		attacks: [
+			new Attack("Boot Stomp",0.5,3),
+			new Attack("Trowel",0.3,2,{ bleed: 2 }),
+			new Attack("Stop thief!",0.2,2,{ stun: 2 })
+		],
+		flavortext: "Mr. McGregor was on his hands and knees planting out young cabbages, but he jumped up and ran after Peter, waving a rake and calling out 'Stop thief!'",
+		quips: [
+			"Stop thief!",
+			"A worm?! In my cabbages?!"
+		]
+	
+	},
+	
+	e21: {
+	
+		id: "e21",
+		next_enemy_id: "j404",
+		name: "Carnal Canine",
+		height: "150px",
+		width: "190px",
+		full_hp: 25,
+		attacks: [
+			new Attack("Claw",0.5,3),
+			new Attack ("Razor Bite",0.5,3,{ bleed: 2 })
+		],
+		flavortext: "This wandering wolf loves nothing in the world more than meat. Meat meat meat. Rabbit meat. Human meat. Worm meat?",
+		quips: [
+			"You're made of meat, right?",
+			"Meat... must eat meat...",
+			"Did I mention? I'm really craving meat right now."
+		]
+	
+	}
+
+}

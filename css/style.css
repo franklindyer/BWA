@@ -1,0 +1,311 @@
+@keyframes playerbreathe {
+	0% { height: 155px; }
+	50% { height: 145px; }
+	100% { height: 155px; }
+}
+
+@-0-keyframes playerbreathe {
+	0% { height: 155px; }
+	50% { height: 145px; }
+	100% { height: 155px; }
+}
+
+@-webkit-keyframes playerbreathe {
+	0% { height: 155px; }
+	50% { height: 145px; }
+	100% { height: 155px; }
+}
+
+@keyframes enemybreathe {
+	0% { padding-top: 0%; }
+	50% { padding-top: 1.5%; }
+	100% { padding-top: 0%; }
+}
+
+@-0-keyframes enemybreathe {
+	0% { padding-top: 0%; }
+	50% { padding-top: 1.5%; }
+	100% { padding-top: 0%; }
+}
+
+@-webkit-keyframes enemybreathe {
+	0% { padding-top: 0%; }
+	50% { padding-top: 1.5%; }
+	100% { padding-top: 0%; }
+}
+
+body {
+	background-color: black;
+}
+
+#everything {
+	width: 750px;
+	height: 600px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.separate_layer {
+	overflow: auto;
+}
+
+.name_tag {
+	background-color: #804000;
+	color: #ffd9b3;
+	font-size: 20px;
+	height: 25px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+#player_name {
+	float: left;
+}
+
+#enemy_name {
+	float: right;
+}
+
+.health_bar {
+	background-color: red;
+	color: #ffcccc;
+	height: 20px; 
+}
+
+#player_health {
+	float: left;
+	text-align: left;
+	padding-left: 5px;
+}
+
+#enemy_health {
+	float: right;
+	text-align: right;
+	padding-right: 5px;
+}
+
+#battlefield {
+	width: 100%;
+	height: 250px;
+	overflow: auto;
+	position: relative;
+	/*background-image: url("/img/background_1.png");*/
+	background-size: cover;
+}
+
+#player_img {
+	height: 150px;
+	position: absolute;
+	bottom: 0;
+	animation: playerbreathe 1.7s infinite;
+	-webkit-animation: playerbreathe 1.7s infinite;
+	-o-animation: playerbreathe 1.7s infinite;
+	width: 115px;
+}
+
+#enemy_display {
+	box-sizing: border-box;
+	float: right;
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	animation: enemybreathe 2s infinite;
+	-webkit-animation: enemybreathe 2s infinite;
+	-o-animation: enemybreathe 2s infinite;
+}
+
+#enemy_img {
+	height: 100%;
+	float: right;
+	position: relative;
+	bottom: 0;
+	right: 0;
+	overflow: auto;
+}
+
+.speechbubble {
+	/*position: absolute;*/
+	text-align: left;
+	padding: 5px;
+	border: 1px solid black;
+	background-color: white;
+	border-radius: 10px;
+	display: none;
+	/*left: 400px;
+	top: 50px;*/
+	max-width: 150px;
+	opacity: 80%;
+}
+
+#effect_table {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+/*	border: 5px solid #662200;
+	background-color: black;
+	color: yellow;*/
+}
+
+#player_effect_table {
+	float: left;
+	height: 25px;
+	z-index: 1;
+}
+
+#enemy_effect_table {
+	float: right;
+	height: 25px;
+	z-index: 1;
+}
+
+#lower_stage {
+	width: 100%;
+	height: 300px;
+	border: 5px solid #804000;
+	background-color: black;
+}
+
+.lower_section {
+	width: 33%;
+	text-align: center;
+	border: 2px solid #804000;
+	border-collapse: separate;
+	background-color: #662200;
+	position: relative;
+	}
+
+#letter_grid {
+	border: 5px solid 804000;
+	border-collapse: separate;
+	background-color: #cc6600;
+	table-layout: fixed;
+	width: 200px;
+	height: 200px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#block_grid {
+	width: 100%;
+	height: 100%;
+	background-color: black;
+	z-index: 1000;
+	position: absolute;
+	top: 0;
+	left: 0;
+	opacity: 80%;
+}
+
+#block_grid_text {
+	position: relative;
+	top: 50%;
+	transform: translateY(-50%); 
+	font-size: 30px;
+	font-family: Copperplate;
+}
+
+#selected_grid {
+	/*border: 5px solid 804000;
+	border-collapse: separate;
+	background-color: black;*/
+	table-layout: fixed;
+	/*height: 50px;*/
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	-ms-transform: translateY(-50%);
+	transform: translateY(-50%);
+	-ms-transform: translateX(-50%);
+	transform: translateX(-50%);
+	z-index: 1;
+}
+
+.grid {
+	width: 25%;
+	height: 25%;
+	border: solid 2px 804000;
+	background-color: #ffd9b3;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+.grid_selected {
+	/*width: 50px;
+	height: 50px;*/
+	font-size: 20px;
+	font-weight: bold;
+	border: solid 2px 804000;
+	background-color: #ffd9b3;
+	text-align: center;
+}
+
+#submit_word {
+	background-color: #4caf50;
+	border: none;
+	color: #ccff33;
+	padding: 5px 10px;
+	text-align: center;
+	text-decoration: none;
+	display: block;
+	font-size: 20px;
+	font-family: Copperplate;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#scramble {
+	background-color: #f44336;
+	border: none;
+	color: #ffcc00;
+	padding: 3px 5px;
+	text-align: center;
+	text-decoration: none;
+	display: block;
+	font-size: 15px;
+	font-family: Copperplate;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#skip_turn {
+	background-color: grey;
+	border: none;
+	color: white;
+	padding: 3px 5px;
+	text-align: center;
+	text-decoration: none;
+	display: none;
+	font-size: 15px;
+	font-family: Copperplate;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#enemy_info {
+	width: 85%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.attacktext {
+	border: 3px solid #e60000;
+	background-color: #b30000;
+	color: #ffcc00;
+	padding: 8px;
+}
+
+#flavortext {
+	border: 3px solid #e60000;
+	background-color: #662200;
+	color: #ffcc00;
+	padding: 4px;
+	font-style: italic;
+	font-size: 13px;
+	line-height: 11px;
+	text-align: left;
+}
+
+.attackicon {
+	height: 25px;
+	float: left;
+}
