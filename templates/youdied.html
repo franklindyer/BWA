@@ -4,6 +4,10 @@
 		<meta charset="utf-8">
 		<title>Title</title>
 	<style type="text/css">
+        
+        body {
+            background-color: #ffe6e6;
+        }
 	
 		div {
 			position: absolute;
@@ -13,6 +17,18 @@
 			-webkit-transform: translateX(-50%) translateY(-50%);
 			transform: translateX(-50%) translateY(-50%);
 		}
+
+        button {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid #88cc00;
+            background-color: #99e600;
+            height: 30px;
+            width: 140px;
+            font-size: 15px;
+            color: #669900;
+        }
 	
 	</style>
 	</head>
@@ -22,7 +38,8 @@
 			<div>
 				<img src="../img/youdied.png" height=300px></img>
 				<h1>Yikes, you died!</h1>
-			</div>
+                <button onclick="window.location.replace('/');">Go home</button>
+                <button onclick="window.location.replace('/page/map');">Try again</button>
 	
 	</body>
 	

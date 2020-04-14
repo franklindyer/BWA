@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Login</title>
+        <style type="text/css"></style>
+    </head>
+
+    <body>
+
+        <p>To gain access to the game, please enter your email into the text box below and click "submit." </p>
+        <input id="user_email" type="text"></input>
+        <button id="submitbutton" onclick="email_submitted();">Submit</button>
+
+        <script>
+            
+            function email_submitted() {
+                user_email = document.getElementById("user_email").value;
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST","/login/"+user_email, true);
+                xhr.send();
+            }
+
+        </script>
+
+    <body>
+
+</html>

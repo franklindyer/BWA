@@ -13,7 +13,7 @@ enemy_library = {
 			new Attack("Hearty growl",0.3,0,{ regenerate: 5, powerup: 2, powerdown: 2 })
 		],
 		flavortext: "This devil-dog from hell is the mangiest mangy-boi you'll ever meet. Guard your jugular. Plus... he has fire breath? WTF?!"
-	
+      	
 	},
 	
 	t2: {
@@ -46,6 +46,152 @@ enemy_library = {
 		flavortext: "Hey, what do you think you're doing, trying to look at enemies that don't exist? Get outta here!"
 	
 	},
+
+    e01: {
+
+        id: "e01",
+        next_enemy_id: "e02",
+        name: "Sock Puppet",
+        height: "160px",
+        width: "130px",
+        full_hp: 6,
+        attacks: [
+            new Attack("Elastic Snap",1,1)
+        ],
+        onapproach: function() {
+            View.message_queue = [
+                { message:"Spell words by selecting tiles from the four-by-four grid. Once you've made a word, click 'attack' to attack the enemy." },
+                { message:"Longer words do more damage, so make your words as long as possible!" }
+            ];
+            setTimeout(() => { View.initialize_dialogue(); }, 2000);
+        },
+        flavortext: "Sock puppet has never been the same since he lost his partner in the washing machine.",
+        quips: [
+            "I oughtta sock you in the face!",
+            "Get outta my way, heel!"
+        ]
+
+    },
+
+    e02: {
+
+        id: "e02",
+        next_enemy_id: "e03",
+        name: "Bedbug",
+        height: "170px",
+        width: "120px",
+        full_hp: 8,
+        attacks: [
+            new Attack("Bite",1,2)
+        ],
+        onapproach: function() {
+            Model.player.hp = 1;
+            Model.player.potions.regenerate += 1;
+            Model.player.potions.powerup += 1;
+            Controller.make_potions_functional();
+            View.refresh_player_health(Model.player, 15);
+            View.message_queue = [
+                { message:"Yikes, what happened? I don't feel so good...", speaker_img:"/img/speaker_lexsurprised.png", float:"left", color:"#ddff99" },
+                { message:"Looks like your health is almost depleted. Don't let it reach zero, or you'll die and have to start over from the beginning of the level." },
+                { message:"Click the red potion on the left to replenish some of your health. Then click the green potion to give your next word a damage boost and finish off the baddie with one word! By defeating enemies, you can win more potions." }
+            ];
+            setTimeout(() => { View.initialize_dialogue(); }, 2000);
+        },
+        flavortext: "Good night... sleep tight... don't let the - holy mother of god, what is that?!",
+        quips: [
+            "Screeeeee!"
+        ]
+
+    },
+
+    e03: {
+
+        id: "e03",
+        next_enemy_id: "e04",
+        name: "Itsy Bitsy Spider",
+        height: "130px",
+        width: "200px",
+        full_hp: 10,
+        attacks: [
+            new Attack("Venomous Bite",1,1,{ poison: 2 })
+        ],
+        onapproach: function() {
+            Model.tiles.grid_tiles[0].status = "amethyst";
+            View.refresh_grid(Model.tiles.grid_tiles);
+            View.message_queue = [
+                { message:"Hey, what's that? It looks shiny. Shiny shiny shiny. I like shiny!", speaker_img:"/img/speaker_lexsurprised.png", float:"left", color:"#ddff99" },
+                { message:"That's a gem tile. You can earn gem times by spelling long words with five or more letters, and each gem tile causes a certain special effect when you use it in a word. This purple amethyst, for instance, poisons the enemy." },
+                { message:"But watch out - sometimes enemy attacks can have special effects as well. This spider enemy can deal extra poison damage." },
+                { message:"Oooh, shiny shiny. Sparkling. Luminous. Lustrous. Resplendent!", speaker_img:"/img/speaker_lexhappy.png", float:"left", color:"#ddff99" }
+            ];
+            setTimeout(() => { View.initialize_dialogue(); }, 2000);
+        },
+        flavortext: "Favorite activities: sliding down water-spouts and scaring children off of tuffets.",
+        quips: [
+            "Hisssss!",
+            "Hey, you got somethin' against arachnids?"
+        ]
+
+    },
+
+    e04: {
+
+        id: "e04",
+        next_enemy_id: "e05",
+        name: "Creepy Doll",
+        height: "150px",
+        width: "130px",
+        full_hp: 12,
+        attacks: [
+            new Attack("Puffy Punch",0.5,1),
+            new Attack("Creepy Gaze",0.5,1,{ tilealter: 6 })
+        ],
+        onapproach: function() {
+            var badletters = ["X","J","Q","K","Z"];
+            for (var i in Model.tiles.grid_tiles) { Model.tiles.grid_tiles[i].letter = badletters[Math.floor(5*Math.random())]; }
+            View.refresh_grid(Model.tiles.grid_tiles);
+            View.message_queue = [
+                { message:"I can't spell anything with these crazy letters! Now I'm stuck! Preposterous!", speaker_img:"/img/speaker_lexsurprised.png", float:"left", color:"#ddff99" },
+                { message:"If you don't see any words, try pressing the red 'scramble' button below the attack button. This will change up your tiles, but be warned - it also skips your turn." }
+            ];
+            setTimeout(() => { View.initialize_dialogue(); }, 2000);
+        },
+        flavortext: "He's not evil. Just misunderstood.",
+        quips: [
+            "Do these suspenders make me look fat?",
+            "I've been meaning to get this arm checked out..."
+        ]
+
+    },
+
+    e05: {
+
+        id: "e05",
+        next_enemy_id: "endofdemo",
+        name: "Baby (Boss)",
+        height: "195px",
+        width: "240px",
+        full_hp: 25,
+        attacks: [
+            new Attack("Teethe",0.8,2,{ bleed: 2 }),
+            new Attack("Temper Tantrum",0.2,2,{ tilesmash: 3, stun: 2  })
+        ],
+        onapproach: function() {
+            View.message_queue = [
+                { message: "The final enemy in every chapter is called a 'boss' and is usually more difficult than other enemies. But by defeating the boss, you can earn a treasure that you can use in subsequent chapters to gain a special advantage." }
+            ];
+            setTimeout(() => { View.initialize_dialogue(); }, 2000);
+        },
+        ondeath: function() {
+            Savefile.complete_savefile.available_treasures.push("t00");
+            Savefile.save_changes();
+        },
+        flavortext: "This cranky toddler has impressive lexical abilities.",
+        quips: [
+            "Begone, noxious invertebrate!",
+        ]
+
+    },
 	
 	e11: {
 	
@@ -140,6 +286,9 @@ enemy_library = {
 			new Attack("Trowel",0.3,2,{ bleed: 2 }),
 			new Attack("Stop thief!",0.2,2,{ stun: 2 })
 		],
+        onclick: function() {
+            
+        },
 		flavortext: "Mr. McGregor was on his hands and knees planting out young cabbages, but he jumped up and ran after Peter, waving a rake and calling out 'Stop thief!'",
 		quips: [
 			"Stop thief!",
@@ -151,7 +300,7 @@ enemy_library = {
 	e21: {
 	
 		id: "e21",
-		next_enemy_id: "j404",
+		next_enemy_id: "e22",
 		name: "Carnal Canine",
 		height: "150px",
 		width: "190px",
@@ -167,6 +316,182 @@ enemy_library = {
 			"Did I mention? I'm really craving meat right now."
 		]
 	
-	}
+	},
+
+    e22: {
+
+        id: "e22",
+        next_enemy_id: "e23",
+        name: "Highway Bandit",
+        height: "170px",
+        width: "130px",
+        full_hp: 30,
+        attacks: [
+            new Attack("Stab",0.4,3,{ bleed: 2 }),
+            new Attack("Pickpocket",0.4,2,{ tilesteal: 1 }),
+            new Attack("Cudgel Bludgeon",0.2,2, { stun: 2 })
+        ],
+        flavortext: "Protect your pockets. And your head.",
+        quips: [
+            "Look behind you - is that a flying pig?",
+            "You don't have any pockets, do you?",
+            "This knife? Oh, it's for cutting my fingernails."
+        ]
+
+    },
+
+    e23: {
+
+        id: "e23",
+        next_enemy_id: "e24",
+        name: "Friar Tuck",
+        height: "185px",
+        width: "110px",
+        full_hp: 45,
+        attacks: [
+            new Attack("Fat Fist",0.5,3),
+            new Attack("Hearty Ale",0.3,0,{ regenerate: 5, powerup: 2 }),
+            new Attack("Tile Munch",0.2,0,{ regenerate: 5, tilesteal: 1 })
+        ],
+        flavortext: "All was quiet save only for the low voices of those that talked together... and saving, also, for the mellow snoring of Friar Tuck, who enjoyed his sleep with a noise as of one sawing soft wood very slowly.",
+        quips: [
+            "Play the music, dance the day, think not on tomorrow...",
+            "Shall I bless you now or when you're dead?",
+            "*Burp*"
+        ]
+
+    },
+
+    e24: {
+    
+        id: "e24",
+        next_enemy_id: "e25",
+        name: "Robin Hood",
+        height: "195px",
+        width: "120px",
+        full_hp: 40,
+        attacks: [
+            new Attack("Poison Arrow",0.4,2,{ poison: 2 }),
+            new Attack("Flaming Arrow",0.3,2,{ burn: 2 }),
+            new Attack("Pickpocket", 0.3, 2, { tilesteal: 2 })
+        ],
+        flavortext: "Fivescore or more good stout yeomen gathered about Robin Hood and chose him to be their leader... they swore never to harm a child nor to wrong a woman - but worms, of course, were fair game.",
+        quips: [
+            "How likest thou that shot, good fellow?",
+            "Thou pratest like an ass!",
+            "Rattle my bones, an thou canst."
+        ]
+
+    },
+
+    e25: {
+
+        id: "e25",
+        next_enemy_id: "e31",
+        name: "Sheriff of Nottingham (Boss)",
+        height: "195px",
+        width: "105px",
+        full_hp: 50,
+        attacks: [
+            new Attack("Paper Cut",0.35,4,{ bleed: 3 }),
+            new Attack("Tax Collection",0.35,3, { regenerate: 6, tilesteal: 2 }),
+            new Attack("King's Orders",0.3,0,{ powerup: 2, powerdown: 2 })
+        ],
+        ondeath: function() {
+            Model.player.full_hp += 5;
+        },
+        flavortext: "Now the Sheriff of Nottingham swore that he himself would bring this knave Robin Hood to justice, and for two reasons: first, because he wanted two hundred pounds, and next, because the forester that Robin Hood had killed was of kin to him.",
+        quips: [
+            "No undocumented worms allowed!",
+            "Here's a worm that needs hanging as badly as any e'er I saw.",
+            "I have a good part of a mind to have thee beaten for thine insolence!"
+        ]
+
+    },
+
+    e31: {
+
+        id: "e31",
+        next_enemy_id: "e32",
+        name: "The Squire",
+        height: "180px",
+        width: "150px",
+        full_hp: 45,
+        attacks: [
+            new Attack("Friendly Jab",0.4,3,{ bleed: 2 }),
+            new Attack("Jubilant Whistle",0.4,0,{ regenerate: 5, powerup: 2 }),
+            new Attack("Saucy Slap",0.2,4,{ tilesmash: 3, stun: 2 })
+        ],
+        flavortext: "A lovere and a lusty bacheler, / with lokkes crulle as they were laid in presse. / ... / Singing he was, or floiting, al the day: / he was as fresh as is the month of May."
+
+    },
+
+    e32: {
+
+        id: "e32",
+        next_enemy_id: "e33",
+        name: "The Merchant",
+        height: "185px",
+        width: "110px",
+        full_hp: 45,
+        attacks: [
+            new Attack("Swindle",0.7,3,{ tilesteal: 1 }),
+            new Attack("Boast",0.3,0,{ powerup: 2, powerdown: 2 })
+        ],
+        flavortext: "This worthy man ful wel his with bisette: / Ther wiste no wight that he was in dette, / so statly was he of his governaunce, / with his bargaines, and with his chevissaunce."
+
+    },
+
+    e33: {
+
+        id: "e33",
+        next_enemy_id: "e34",
+        name: "The Clerk",
+        height: "185px",
+        width: "105px",
+        full_hp: 40,
+        attacks: [
+            new Attack("Denounce",0.4,3),
+            new Attack("Book Learning",0.3,0,{ tilealter: 2, tilesteal: 2 }),
+            new Attack("Pedantic Prattle",0.3,2,{ tilealter: 2, tilesmash: 1 })
+        ],
+        flavortext: "But al be that he was a philosophre / yit hadde he but litel gold in cofre; / but al that he mighte of his freendes hente, / on bookes and on lerning he it spente..."
+
+    },
+
+    e34: {
+
+        id: "e34",
+        next_enemy_id: "e35",
+        name: "The Knight",
+        height: "190px",
+        width: "130px",
+        full_hp: 55,
+        attacks: [
+            new Attack("Slash",0.5,4,{ bleed: 3 }),
+            new Attack("Shield Pummel",0.3,3,{ tilesmash: 3 }),
+            new Attack("Charge",0.2,3,{ stun: 2 })
+        ],
+        flavortext: "At mortal batailes hadde he been fifteene, / and foughten for oure faith at Tramissene / in listes thries, and ay slain his fo."
+
+    },
+
+    e35: {
+
+        id: "e35",
+        next_enemy_id: "e11",
+        finishpage: "endofdemo",
+        name: "The Wife of Bath (Boss)",
+        height: "190px",
+        width: "120px",
+        full_hp: 60,
+        attacks: [
+            new Attack("Forehand Slap",0.35,5,{ tilesmash: 1 }),
+            new Attack("Backhand Slap",0.35,3,{ tilesmash: 3 }),
+            new Attack("Haughty Reprobation",0.3,2,{ powerdown: 3 })
+        ],
+        flavortext: "Bold was hir face and fair and reed of hewe. / She was a worthy womman al hir live: / housbondes at chirche dore she hadde five, / withouten other compaignye in youthe... / But therof needeth nought to speke as nouthe."
+
+    }
 
 }

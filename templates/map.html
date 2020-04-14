@@ -5,29 +5,52 @@
 		<title>Title</title>
 	<style type="text/css">
 	
+        @-webkit-keyframes playerbreathe {
+            0% { height: 60px; }
+            50% { height: 70px; }
+            100% { height: 60px; }
+        }
+
 		body {
 			background-color: black;
 		}
 		
 		#everything {
+            position: relative;
 			width: 750px;
 			height: 600px;
 			margin-left: auto;
 			margin-right: auto;
 		}
 		
+        #map_img {
+            width: 100%;
+        }
+
+        #lex_img {
+            position: absolute;
+            z-index: 1;
+            display: none;
+            width: 50px;
+            animation: playerbreathe 2s infinite;
+        }
+
+        #info_text {
+            width: 100%;
+        }
+
 		#adventure_text {
+            width: 60%;
 			text-align: center;
 			border: 3px solid #663300;
 			background-color: #b35900;
 			color: #ffcc00;
-			padding: 30px;
-			font-family: Arial;
+			padding: 10px;
 		}
 		
 		#chap_title {
 			font-weight: bold;
-			font-size: 30px;
+			font-size: 20px;
 		}
 		
 		#chap_description {
@@ -42,9 +65,24 @@
 			text-align: center;
 			text-decoration: none;
 			display: inline-block;
-			font-size: 25px;
+			font-size: 15px;
 			font-family: Copperplate;
 		}
+
+        #treasure_select {
+            width: 40%;
+            border: 3px solid #663300;
+            background-color: #b35900;
+            color: #ffcc00;
+            padding: 10px;
+        }
+
+        #treasure_scroll {
+            width: 270px;
+            height: 130px;
+            overflow: auto;
+            background-color: #b35900;
+        }
 	
 	</style>
 	</head>
@@ -52,27 +90,82 @@
 	<body>
 
 	<div id="everything">
-		<div id="adventure_text">
-			<t1 id="chap_title"></t1>
-			<p id="chap_description"></p>
-			<button>Let's go!</button>
-		</div>
+        <img id="lex_img" src="/img/lex.png"></img>
+        <img id="map_img"></img>
+        <table id="info_box"><tr>
+		    <td id="adventure_text">
+			    <t1 id="chap_title"></t1>
+			    <p id="chap_description"></p>
+			    <button>Let's go!</button>
+		    </td>
+            <td id="treasure_select">
+                Choose up to three treasures:
+                <div id="treasure_scroll"> 
+                    <table id="treasure_table"><tr id="treasure_row"></tr></table>
+                </div>
+            </td>
+        </tr></table>
 	</div>
 	
 	<script src="/js/traveltext_library.json"></script>
-	<script>
-		chap_des = document.getElementById("chap_description");
+	<script src="/js/treasure_library.json"></script>
+    <script>
+        complete_savefile = JSON.parse(localStorage.getItem("savefile"));
+		this_savefile = complete_savefile.games[complete_savefile.current_game];
+        chap_des = document.getElementById("chap_description");
 		chap_tit = document.getElementById("chap_title");
-		tt_id = localStorage.getItem("bwa_chapter");
-		chap_des.innerHTML = travel_text[tt_id].description;
+		tt_id = this_savefile.next_enemy.slice(1,-1);
+       
+        lex_img = document.getElementById("lex_img");
+        if (travel_text[tt_id].lex_pos) { 
+            lex_img.style.display = "block"; 
+            lex_img.style.left = String(travel_text[tt_id].lex_pos[0])+"px";
+		    lex_img.style.bottom = String(travel_text[tt_id].lex_pos[1])+"px";
+        }
+        chap_des.innerHTML = travel_text[tt_id].description;
 		chap_tit.innerHTML = travel_text[tt_id].name;
-		next_enemy = localStorage.getItem("next_enemy_id");
-		
 		go_button = document.querySelector("button");
 		go_button.addEventListener("click", () => {
-			window.location.replace("/enemy/"+next_enemy);
+            this_savefile.treasures = [];
+            for (var i in selected_treasures) { this_savefile.treasures.push(treasure_library[selected_treasures[i]]); }
+            complete_savefile[complete_savefile.current_savefile] = JSON.parse(JSON.stringify(this_savefile));
+            localStorage.setItem("savefile", JSON.stringify(complete_savefile));
+			window.location.replace("/enemy/");
 		})
-	</script>
+        document.getElementById("map_img").src = "/img/map_book_"+String(Math.floor((tt_id-1)/10)+1)+".png";
+
+        <!-- down here: make it so that checkboxes are listed for the treasures so that they dynamically add/remove elements from an array of selected treasures-->	
+
+        selected_treasures = [];
+
+        function treasure_clicked() {
+            if (selected_treasures.includes(this.id)) {
+                for (var i in selected_treasures) { if (selected_treasures[i] == this.id) { selected_treasures.splice(i,1); } }
+                this.style.color = "black";
+            } else if (selected_treasures.length <= 3) {
+                selected_treasures.push(this.id);
+                this.style.color = "yellow";
+            }
+        }
+
+        treasure_list = document.getElementById("treasure_row");
+        for (var i in complete_savefile.available_treasures) {
+            var tr_id = complete_savefile.available_treasures[i];
+            var td = document.createElement("td");
+            var treasure_img = document.createElement("img");
+            td.id = tr_id;
+            treasure_img.src = "/img/treasure_"+tr_id+".png";
+            td.innerHTML = treasure_library[tr_id].name;
+            td.style.color = "black";
+            td.style.width = "50px";
+            td.addEventListener("click", treasure_clicked);
+            td.appendChild(treasure_img);
+            treasure_img.style.width = "100%";
+            treasure_list.appendChild(td);
+
+        }
+
+    </script>
 	
 	</body>
 	

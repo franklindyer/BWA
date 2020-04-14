@@ -1,13 +1,30 @@
 travel_text = {
 
+    "0": {
+        name: "Tutorial: Easy Reader",
+        description: "New to the game? Learn to play against a few easy enemies before moving on to a more difficult book."
+    },
+
 	"1": {
 		name: "Chapter 1: Among the cabbages",
-		description: "Lex finds himself in the idyllic garden of a countryside cottage. Several furry critters have come to partake in its juicy cabbages, including... a cat wearing clothes?"
-	},
+		description: "Lex finds himself in the idyllic garden of a countryside cottage. Several furry critters have come to partake in its juicy cabbages, including... a cat wearing clothes?",
+	    lex_pos: [30,130]
+    },
 	
 	"2": {
 		name: "Chapter 2: Sherwood Forest",
-		description: "Eager to leave the perilous patch of cabbages, Lex hurries down a well-trodden path through the woods. Unfortunately, his journey is instantly impeded by hostile highway hooligans."
-	} 
+		description: "Eager to leave the perilous patch of cabbages, Lex hurries down a well-trodden path through the woods. Unfortunately, his journey is instantly impeded by hostile highway hooligans.",
+        lex_pos: [60,270]
+    },
+
+    "3": {
+        name: "Chapter 3: The Worm's Tale",
+        description: "After emerging from the perilous wood, Lex catches sight of a homely inn beside the road. Hoping for hospitality, Lex finds instead a motley crew of rowdy travellers of all social standings...",
+        lex_pos: [100,420]
+    },
+
+    "8": {
+        name: "Chapter 8: Sir Gawain and the Green Worm"
+    }
 
 }

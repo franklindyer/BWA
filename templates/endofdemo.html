@@ -5,6 +5,10 @@
 		<title>Title</title>
 	<style type="text/css">
 	
+        body {
+            background-color: #cce6ff;
+        }
+
 		div {
 			position: absolute;
 			top: 50%;
@@ -13,6 +17,16 @@
 			-webkit-transform: translateX(-50%) translateY(-50%);
 			transform: translateX(-50%) translateY(-50%);
 		}
+
+        button {
+            display: block;
+            border: 1px solid #88cc00;
+            background-color: #99e600;
+            height: 30px;
+            width: 140px;
+            font-size: 15px;
+            color: #669900;
+        }
 	
 	</style>
 	</head>
@@ -20,8 +34,10 @@
 	<body>
 	
 			<div>
-				<img src="../img/youdied.png" height=300px></img>
-				<h1>End of demo!</h1>
+				<img src="../img/lex_badass.png" height=300px></img>
+				<h1>Congratulations, you've finished the game!</h1>
+                <p>Feeling like a hotshot? See how far you get when you reopen the game in hardcore mode!</p>
+                <button onclick="window.location.replace('/');">Go Home</button>
 			</div>
 	
 	</body>

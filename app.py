@@ -1,23 +1,69 @@
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, make_response, request, render_template, send_from_directory
+from flask_mail import Mail, Message
+import random, string
 
 app = Flask(__name__)
+app.config.update(
+    MAIL_SUPPRESS_SEND = False
+)
+mail = Mail(app)
+
+approved_addresses = ["franklin@dyer.me", "george@dyer.me"]
+temporary_hashes = []
+
+def bwa_check_cookie(req):
+    if "bwa_authenticator" in req.cookies:
+        return True
+    else:
+        return False
 
 @app.errorhandler(404)
 def page_not_found(e):
 	return render_template("404.html"), 404
-	
+
+@app.route('/login/<path:path>', methods=['POST', 'GET'])
+def test_login(path):
+    if request.method == 'POST':
+        if path in approved_addresses:
+            new_hash = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
+            temporary_hashes.append(new_hash)
+            if len(temporary_hashes) > 10: del temporary_hashes[0]
+            msg = Message("Game access",sender="bw@dev.franklin.dyer.me",recipients=[path],body="Looks like you've requested access to my game! To see the beta version, go this url: dev.franklin.dyer.me/login/"+new_hash)
+            mail.send(msg)
+        else:
+            msg_fr = Message("Game access",sender="bw@dev.franklin.dyer.me",recipients=["franklin@dyer.me"], body="The following person has requested access to your game: "+path)
+            msg_user = Message("Game access", sender="bw@dev.franklin.dyer.me",recipients=[path], body="You've requested access to my game, but your email is not on the list of approved users. Permission has been requested.")
+            mail.send(msg_user)
+            mail.send(msg_fr)
+    elif request.method == 'GET':
+        if path in temporary_hashes:
+            resp = make_response("You've been granted access to the game. Try accessing the homepage again.")
+            resp.set_cookie("bwa_authenticator","approved")
+            return resp
+        else:
+            return "Sorry, your access code is invalid."
+
 @app.route("/")
 def home():
-	return render_template('home.html')
+    if bwa_check_cookie(request):
+        return render_template('home.html')
+    else:
+        return render_template("login.html")
 	
 @app.route("/page/<path:path>")
 def send_page(path):
-	return render_template(path+".html")
-	
-@app.route("/enemy/<path:path>")
-def send_enemy(path):
-	return render_template("battle_screen.html",enemyid=path)
-	
+    if bwa_check_cookie(request):
+        return render_template(path+".html")
+    else:
+        return "Sorry, you don't have permission to access this."
+
+@app.route("/enemy/")
+def send_enemy():
+    if bwa_check_cookie(request):
+	    return render_template("battle_screen.html")
+    else:
+        return "Sorry, you don't have permission to access this."
+
 @app.route('/js/<path:path>')
 def send_js(path):
 	return send_from_directory('js', path)
@@ -32,10 +78,17 @@ def send_img(path):
 	
 @app.route('/checkword/<path:path>')
 def check_word(path):
-	if str(path.upper()) in open('wordlist.txt').read():
+	if str(path.upper())+'*' in open('wordlists/wordlist.txt').read():
 		return 't';
 	else:
 		return 'f';
+
+@app.route('/specialword/<path:path>/<path:word>')
+def check_specialword(path,word):
+    if str(word.upper())+'*' in open('wordlists/wordlist_'+str(path)+'.txt').read():
+        return 't';
+    else:
+        return 'f';
 
 if __name__ == '__main__':
 	app.run(debug=True, use_reloader=False, port=3001)

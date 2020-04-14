@@ -13,6 +13,7 @@ class Attack {
 		this.effects = {
 			tilesmash: 0,
 			tilealter: 0,
+            tilesteal: 0,
 			powerup: 0,
 			powerdown: 0,
 			regenerate: 0,
@@ -25,6 +26,10 @@ class Attack {
 			this.effects[i] = effect_obj[i];
 		}
 	}
+}
+
+deepClone = function(object) {
+    return JSON.parse(JSON.stringify(object));
 }
 
 weightedRandom = function(weights) {
@@ -45,7 +50,11 @@ var Model = {
 	
 		letter_strengths: {'A':1, 'B':2, 'C':2, 'D':2, 'E':1, 'F':2, 'G':2, 'H':2, 'I':1, 'J':3, 'K':2, 'L':2, 'M':2, 'N':1, 'O':1, 'P':2, 'Q':3, 'R':1, 'S':1, 'T':1, 'U':2, 'V':2, 'W':2, 'X':3, 'Y':2, 'Z':3},
 		
-		gem_awards: { 3:"normal", 4:"normal", 5:"amethyst", 6:"emerald", 7:"garnet", 8:"amethyst", 9:"amethyst", 10:"amethyst", 11:"amethyst", 12:"amethyst", 13:"amethyst", 14:"amethyst", 15:"amethyst", 16:"amethyst" }
+		gem_awards: { 3:"normal", 4:"normal", 5:"amethyst", 6:"emerald", 7:"garnet", 8:"sapphire", 9:"ruby", 10:"amethyst", 11:"amethyst", 12:"amethyst", 13:"amethyst", 14:"amethyst", 15:"amethyst", 16:"amethyst" },
+
+        normal_potion_probs: { regenerate:0.4, powerup:0.2, purify:0.1 },
+
+        boss_potion_probs: { regenerate:0.7, powerup:0.5, purify:0.3 }
 	
 	},
 	
@@ -65,6 +74,13 @@ var Model = {
 			}
 			return this.grid_tiles;
 		},
+
+        purify_tiles: function() {
+            for (i in this.grid_tiles) {
+                if (this.grid_tiles[i] == "stolen") { this.grid_tiles[i]= new Tile(weightedRandom(Model.stats.letter_freqs, "normal")) }
+                if (this.grid_tiles[i].status == "smashed") { this.grid_tiles[i].status="normal" }
+            }
+        },
 		
 		select_tile: function(index) {
 			this.selected_tiles.push(this.grid_tiles[index]);
@@ -80,9 +96,13 @@ var Model = {
 		},
 		
 		afflict_tile: function(affliction) {
-			var rand_tile = this.grid_tiles[Math.floor(Math.random() * this.grid_tiles.length)];
-			rand_tile.status = affliction;
-		},
+		    if (affliction=="tilesteal") {
+                this.grid_tiles[Math.floor(Math.random()*this.grid_tiles.length)]="stolen";
+            } else {
+                var rand_tile = this.grid_tiles[Math.floor(Math.random() * this.grid_tiles.length)];
+			    rand_tile.status = affliction;
+		    }
+        },
 		
 		alter_tile: function() {
 			bad_tiles = ["J","Q","X","Z"];
@@ -117,6 +137,16 @@ var Model = {
 			powerdown: 0,
 			stun: 0
 		},
+
+        potions: {
+            regenerate: 0,
+            powerup: 0,
+            purify: 0
+        },
+
+        treasures: [],
+
+        hardcore: 0,
 		
 		smart_health_decrement: function(damage) {
 			if (this.hp > damage) {
@@ -124,7 +154,17 @@ var Model = {
 			} else {
 				this.hp = 0;
 			}
-		}
+		},
+
+        get_random_potion: function(potion_probs) {
+            for (var i in potion_probs) {
+                if (Math.random()<potion_probs[i]) { this.potions[i] += 1 }
+            } 
+        },
+
+        reset_player_effects: function() {
+            for (var i in this.special) { this.special[i] = 0; }
+        },
 		
 	},
 	
@@ -146,7 +186,8 @@ var Model = {
 			bleed: 0,
 			burn: 0,
 			powerup: 0,
-			powerdown: 0
+			powerdown: 0,
+            freeze: 0
 		},
 		
 		smart_health_decrement: function(damage) {
@@ -155,7 +196,16 @@ var Model = {
 			} else {
 				this.hp = 0;
 			}
-		}
+		},
+
+        reset_enemy_effects: function() {
+            for (var i in this.special) { this.special[i] = 0; }
+        },
+
+        updateme: function(new_enemy) {
+            delete this.ondeath;
+            for (var i in new_enemy) { this[i] = new_enemy[i] }
+        }
 	
 	},
 	
@@ -170,7 +220,7 @@ var Model = {
 			power = 0;
 			for (i in word_tiles) {
 				if (word_tiles[i].status != "smashed") { 
-					power += this.stats.letter_strengths[word_tiles[i]['letter']] 
+					power += this.stats.letter_strengths[word_tiles[i]['letter']]; 
 				}
 				if (word_tiles[i].status == "amethyst") {
 					this.enemy.special.poison += 2;
@@ -185,18 +235,85 @@ var Model = {
 					this.enemy.special.powerup = 0;
 					power += 1;
 				}
-			}
+                if (word_tiles[i].status == "sapphire") {
+                    this.enemy.special.freeze += 1;
+                    power += 1;
+			    }
+                if (word_tiles[i].status == "ruby") {
+                    this.enemy.special.burn += 3;
+                    power += 1;
+                }
+            }
 			return power;
 	},
 	
 	initialize: function() {
 		this.tiles.fill_tiles();
+        if (this.player.hardcore == 0) { this.player.hp = this.player.full_hp };
 		this.enemy.hp = this.enemy.full_hp;
-	}
+	    this.whoseturn = "player"; 
+    }
 	
 }
 
 var View = {
+
+    message_queue: [],
+
+    dialogue_clickable: 0,
+
+    display_message: function(dialogue_obj) {
+        this.dialogue_clickable = 0;
+        var blackout = document.getElementById("blackout");
+        var messageboard = document.getElementById("messageboard");
+        var message = document.getElementById("speaker_message");
+        message.innerHTML = "";
+        var speaker_img = document.getElementById("current_speaker");
+        speaker_img.style.display = "none";
+        blackout.style.display = "inline-block";
+        if (dialogue_obj.color) { messageboard.style.backgroundColor = dialogue_obj.color; } else { messageboard.style.backgroundColor = "white"; }
+        if (dialogue_obj.float) { speaker_img.style.float = dialogue_obj.float; }
+        if (dialogue_obj.speaker_img) { speaker_img.style.display = "block"; speaker_img.src = dialogue_obj.speaker_img; }
+        for (var i = 0; i < dialogue_obj.message.length; i++) {
+            setTimeout(function(i) {
+                message.innerHTML = dialogue_obj.message.substring(0, i+1);
+            }.bind(this,i),20*i);
+        }
+        setTimeout(() => { this.dialogue_clickable = 1; }, 20*dialogue_obj.message.length);
+    },
+
+    initialize_dialogue: function() {
+        if (this.message_queue.length != 0) { this.display_message(this.message_queue.shift()); }
+    },
+
+    make_dialogue_functional: function() {
+        document.getElementById("messageboard").addEventListener('click', () => {
+            if (this.dialogue_clickable) {
+                if (this.message_queue == 0) {
+                    document.getElementById("blackout").style.display = "none";
+                } else {
+                    this.display_message(this.message_queue.shift());
+                }
+            }
+        });
+    },
+
+    display_helptext: function(helptext) {
+        var help_div = document.getElementById("help_text");
+        help_div.innerHTML = helptext;
+    },
+
+    tile_helptexts: {
+        normal: "",
+// gem tiles
+        amethyst: "Amethyst tile: poisons enemy.",
+        emerald: "Emerald tile: regenerates 5 hp.",
+        garnet: "Garnet tile: powers enemy down.",
+        sapphire: "Sapphire tile: freezes enemy.",
+        ruby: "Ruby tile: burns enemy.",
+// tile ailments
+        smashed: "Smashed tile: deals no damage."
+    },
 
 	set_name_tags: function(pname, ename) {
 		var player_tag = document.getElementById("player_name");
@@ -211,17 +328,18 @@ var View = {
 		enemy_img.src = "/img/enemy_"+enemy.id+".png";
 		enemy_display.style.height = enemy.height;
 		enemy_img.style.width = enemy.width;
+        enemy_img.style.display = "block";
 	},
 	
 	set_background_image: function(enemy) {
 		var battlefield = document.getElementById("battlefield");
-		img_url = "url(/img/background_"+String(enemy.id).substring(1, enemy.id.length-1)+".png)";
+		var img_url = "url(/img/background_"+String(enemy.id).substring(1, enemy.id.length-1)+".png)";
 		battlefield.style.backgroundImage = img_url;
 	},
 	
 	display_enemy_quips: function(enemy) {
 		if (enemy.quips) {
-			setInterval(() => {
+			var quip_interval_id = setInterval(() => {
 				var random_quip = enemy.quips[Math.floor(Math.random() * enemy.quips.length)];
 				var speechbubble = document.getElementById("enemy_speechbubble");
 				speechbubble.innerHTML = random_quip;
@@ -230,15 +348,66 @@ var View = {
 					speechbubble.style.display = "none";
 				},20000)
 			}, 80000)
+            return quip_interval_id;
 		}
 	},
+
+    render_potions: function(player) {
+        var needs_new_event_listener = {};
+        for (var i in player.potions) {
+            var preex_potion_count = document.getElementById(String(i)+"_potion_count");
+            needs_new_event_listener[i] = false;
+            if (preex_potion_count && player.potions[i] != 0) {
+                preex_potion_count.innerHTML = String(player.potions[i]);
+            } else {
+                var potion_section = document.getElementById(String(i)+"_potions");
+                potion_section.innerHTML = "";
+                if (player.potions[i] != 0) {
+                    var img_url = "/img/"+String(i)+"_potion.png";
+                    var potion_img = document.createElement("img");
+                    var potion_count = document.createElement("t1");
+                    potion_img.src = img_url;
+                    potion_count.innerHTML = String(player.potions[i]);
+                    potion_count.id = String(i) + "_potion_count";
+                    potion_section.appendChild(potion_count);
+                    potion_section.appendChild(potion_img);
+                    potion_img.style.width = "100%";
+                    potion_img.id = String(i)+"_potion_clicker";
+                    needs_new_event_listener[i] = true;
+                }
+            }
+        }
+        return needs_new_event_listener;
+    },
+
+    render_treasures: function(player) {
+        for (var i in player.treasures) {
+            var treasure_section = document.getElementById("treasure"+String(Number(i)+1));
+            treasure_section.innerHTML = "";
+            var img_url = "/img/treasure_"+String(player.treasures[i].id)+".png";
+            var treasure_img = document.createElement("img");
+            var treasure_name = document.createElement("t1");
+            var treasure_desc = document.createElement("p");
+            treasure_img.src = img_url;
+            treasure_name.innerHTML = player.treasures[i].name;
+        //    treasure_desc.innerHTML = player.treasures[i].description;
+        //    treasure_desc.style.fontSize = "8px";
+        //    treasure_desc.style.lineHeight = "8px";
+            treasure_section.appendChild(treasure_img);
+            treasure_section.appendChild(treasure_name);
+        //    treasure_section.appendChild(treasure_desc);
+            treasure_img.style.width = "85%";
+        }
+    },
 	
 	tile_colors: {
 		normal: ["#ffd9b3", "#ffd9b3", "to bottom right"],
 		smashed: ["#cccccc", "#cccccc", "to bottom right"],
 		amethyst: ["#cc00cc", "#ffccff", "to bottom right"],
 		emerald: ["#b3ffb3", "#00cc00", "to bottom right"],
-		garnet: ["#ffcc66", "#ff6600", "to bottom right"]	
+		garnet: ["#ffcc66", "#ff6600", "to bottom right"],
+        sapphire: ["#b3e6ff", "#0077b3", "to bottom right"],
+        ruby: ["#ff9980", "#ff3300", "to bottom right"]
 	},
 
 	refresh_grid: function(grid_tiles, selected_tiles) {
@@ -252,7 +421,7 @@ var View = {
 		}
 		for (i in grid_tiles) {
 			current_tile = tile_tds[i];
-			if (grid_tiles[i] != 0) {
+			if (grid_tiles[i] != 0 && grid_tiles[i] != "stolen") {
 				var type = grid_tiles[i].status;
 				current_tile.style.backgroundImage = "linear-gradient( "+tile_style[type][2]+", "+tile_style[type][0]+", "+tile_style[type][1]+")";
 				tile_tds[i].innerHTML = grid_tiles[i].letter;
@@ -314,6 +483,14 @@ var View = {
 			setTimeout(set_new, 300*i+150);
 		}
 		player_bar.innerHTML = Math.ceil(player.hp);
+        var player_img = document.getElementById("player_img");
+        if (player.hp <= 3 && player.hardcore == 0) {
+            player_img.src = "/img/lex_lowhealth.png";
+            player_img.style["animation"] = player_img.style["-webkit-animation"] = player_img.style["-o-animation"] = "playerbreathe 1.0s infinite";
+        } else if (player.hardcore == 0) {
+            player_img.src = "/img/lex.png";
+            player_img.style["animation"] = player_img.style["-webkit-animation"] = player_img.style["-o-animation"] = "playerbreathe 1.7s infinite";
+        }
 	},
 	
 	refresh_player_effects: function(player) {
@@ -333,6 +510,12 @@ var View = {
 			}
 		}
 	},
+
+    enemy_fade: function() {
+        enemy_img = document.getElementById("enemy_img");
+        enemy_img.style.animation = "fadeout 2s";
+        setTimeout(() => { enemy_img.style.display = "none"; enemy_img.style.animation = ""; },2000)
+    },
 	
 	refresh_enemy_effects: function(enemy) {
 		var enemy_effects = document.getElementById("enemy_effects");
@@ -364,7 +547,8 @@ var View = {
 	},
 
 	render_enemy_info: function(enemy) {
-		for (var i in enemy.attacks) {
+        document.getElementById("enemy_info").innerHTML = "";
+        for (var i in enemy.attacks) {
 			var row = document.createElement("tr");
 			var entry = document.createElement("td");
 			entry.classList.add("attacktext")
@@ -372,19 +556,21 @@ var View = {
 			var node = document.createTextNode(enemy.attacks[i].name);
 			entry.appendChild(node);
 			row.appendChild(entry);
-			if (enemy.attacks[i].damage != 0) {
-				var icon = document.createElement("img");
-				icon.src = "/img/damage_icon.png";
-				icon.classList.add("attackicon")
-				entry.appendChild(icon);
-			}
+            var show_sword = 1;
 			for (var j in enemy.attacks[i].effects) {
 				if (enemy.attacks[i].effects[j] != 0) {
 					var icon = document.createElement("img");
 					icon.src = "/img/"+String(j)+"_icon.png";
 					icon.classList.add("attackicon")
 					entry.appendChild(icon);
+                    show_sword = 0;
 				}
+			}
+			if (enemy.attacks[i].damage != 0 && show_sword == 1) {
+				var icon = document.createElement("img");
+				icon.src = "/img/damage_icon.png";
+				icon.classList.add("attackicon")
+				entry.appendChild(icon);
 			}
 			document.getElementById("enemy_info").appendChild(row)
 		}
@@ -409,11 +595,42 @@ var View = {
 
 }
 
+var Savefile = {
+
+    retrieve_savefile: function() {
+        this.complete_savefile = JSON.parse(localStorage.getItem("savefile"));
+        this.this_savefile = deepClone(this.complete_savefile.games[this.complete_savefile.current_game]);
+    },
+
+    save_changes: function() {
+        this.complete_savefile.games[this.complete_savefile.current_game] = deepClone(this.this_savefile);
+        localStorage.setItem("savefile",JSON.stringify(this.complete_savefile));
+    },
+
+    set_death_checkpoint: function() {
+        for (var i in this.this_savefile) {
+            if (i != "death_checkpoint") { this.this_savefile.death_checkpoint[i] = deepClone(this.this_savefile)[i]; }
+        }
+    },
+
+    death_overwrite: function() {
+        for (var i in this.this_savefile.death_checkpoint) {
+            this.this_savefile[i] = this.this_savefile.death_checkpoint[i];
+        }
+    },
+
+    change_this_savefile: function(updates) {
+        for (var i in updates) { this.this_savefile[i] = deepClone(updates)[i]; }
+    },
+
+}
+
 var Controller = {
 
 	respond_to_tile_click: function() {
-		if (this.innerHTML != "" && Model.whoseturn == "player" && Model.player.special.stun == 0) {
+		if (this.innerHTML != "" && Model.whoseturn == "player") {
 			tile_id = event.srcElement.id.substring(4);
+            View.display_helptext(View.tile_helptexts[Model.tiles.grid_tiles[Number(tile_id)].status]);
 			Model.tiles.select_tile(tile_id);
 			View.refresh_grid(Model.tiles.grid_tiles, Model.tiles.selected_tiles);
 		}
@@ -422,7 +639,8 @@ var Controller = {
 	respond_to_deselect: function() {
 		Model.tiles.deselect_all_tiles();
 		View.refresh_grid(Model.tiles.grid_tiles, Model.tiles.selected_tiles);
-	},
+	    View.display_helptext("");
+    },
 	
 	respond_to_word_submit: function() {
 		if (Model.whoseturn == "player") {
@@ -432,10 +650,12 @@ var Controller = {
 			}
 			if (word.length > 2) { Controller.checkword(word); }
 		}
+        View.display_helptext("");
 	},
 	
 	respond_to_scramble: function() {
 		if (Model.whoseturn == "player") {
+            Controller.activate_treasures("scramble");
 			Model.whoseturn = "enemy";
 			Model.tiles.deselect_all_tiles();
 			View.refresh_grid(Model.tiles.scramble_tiles());
@@ -450,6 +670,41 @@ var Controller = {
 			setTimeout(() => { Controller.enemy_attack_sequence(); }, 1000);
 		}
 	},
+
+    respond_to_drinkpotion: function(potion) {
+        if (Model.whoseturn=="player") {
+            if (potion=="regenerate") {
+                old_player_health = Model.player.hp;
+                if (Model.player.full_hp-Model.player.hp > 5) { Model.player.hp += 5; } else { Model.player.hp = Model.player.full_hp; }
+                View.refresh_player_health(Model.player, old_player_health);
+            }
+            if (potion=="powerup") {
+                Model.player.special.powerup += 1;
+                Model.player.special.powerdown = 0;
+                View.refresh_player_effects(Model.player);
+            }
+            if (potion=="purify") {
+                Model.tiles.purify_tiles();
+                var sp = Model.player.special;
+                sp.bleed = sp.poison = sp.burn = sp.powerdown = sp.stun = 0;
+                View.show_grid_blocker();
+                View.refresh_player_effects(Model.player);
+                View.refresh_grid(Model.tiles.grid_tiles);
+            }
+            Model.player.potions[potion] += -1;
+            this.make_potions_functional();
+        }
+    },
+
+    make_potions_functional: function() {
+        var nnel = View.render_potions(Model.player);
+        var reg = document.getElementById("regenerate_potion_clicker");
+        var pwu = document.getElementById("powerup_potion_clicker");
+        var pur = document.getElementById("purify_potion_clicker");
+        if (nnel.regenerate) { reg.addEventListener("click",() => this.respond_to_drinkpotion("regenerate")); }
+        if (nnel.powerup) { pwu.addEventListener("click",() => this.respond_to_drinkpotion("powerup")); }
+        if (nnel.purify) { pur.addEventListener("click",() => this.respond_to_drinkpotion("purify")); }
+    },
 
 	make_grid_functional: function() {
 		var clickable_tiles = document.getElementsByClassName("grid");
@@ -478,12 +733,34 @@ var Controller = {
 		};
 		xhr.send();
 	},
-	
+
+    special_checkword: function(word, category, executeme) {
+		const xhr = new XMLHttpRequest(), method = "GET", url = "/specialword/"+category+"/"+word;
+		xhr.open(method, url, true);
+		_this = this;
+		xhr.onreadystatechange = function () {
+			if(xhr.readyState === XMLHttpRequest.DONE) {
+				var status = xhr.status;
+				if (status === 0 || (status >= 200 && status < 400)) {
+					if (xhr.responseText == 't') { executeme(); }
+				}
+			}
+		};
+		xhr.send();
+	},
+
+    activate_treasures: function(triggertype) {
+        for (var i in Model.player.treasures) { 
+            if (Model.player.treasures[i].triggertype==triggertype) { treasure_library[Model.player.treasures[i].id].whentriggered(); }
+        }
+    },
+
 	player_attack_sequence: function() {
 		Model.whoseturn = "enemy";
 		var word_tiles = Model.tiles.selected_tiles;
 		var old_enemy_hp = Model.enemy.hp;
 		var old_player_hp = Model.player.hp;
+        this.activate_treasures("submitword");
 		var word_power = Model.word_power(word_tiles)
 		if (Model.player.special.powerup != 0 && Model.player.special.powerdown == 0) {
 			Model.enemy.smart_health_decrement(1.5*word_power);
@@ -497,9 +774,12 @@ var Controller = {
 		Model.tiles.selected_tiles = [];
 		View.refresh_grid(Model.tiles.fill_tiles(Model.stats.gem_awards[word_tiles.length]), []);
 		View.refresh_player_health(Model.player, old_player_hp);
-		if (Model.enemy.hp == 0) { this.enemy_defeated(); }
-		setTimeout(() => { this.enemy_attack_sequence(); }, 4000);
-		// note to self: setTimeout changes the referent of "this" to the global object, unless you do it in this funny way with () => smth
+		if (Model.enemy.hp == 0) { 
+            this.enemy_defeated(); 
+        } else {
+		    setTimeout(() => { this.enemy_attack_sequence(); }, 4000);
+	    }	
+    // note to self: setTimeout changes the referent of "this" to the global object, unless you do it in this funny way with () => smth
 	},
 	
 	enemy_special_effects: function(attack) {
@@ -533,43 +813,50 @@ var Controller = {
 		for (var i = 0; i < attack.effects.tilealter; i++) {
 			Model.tiles.alter_tile();
 		}
-		View.refresh_player_effects(Model.player);
-		View.refresh_enemy_effects(Model.enemy);
-		View.refresh_grid(Model.tiles.grid_tiles);
+// tilesteal
+        for (var i = 0; i < attack.effects.tilesteal; i++) {
+            Model.tiles.afflict_tile("tilesteal");
+        }
 // stun
 		if (Model.player.special.stun > 0) { Model.player.special.stun += -1 }
 		Model.player.special.stun += attack.effects.stun;
+
+		View.refresh_player_effects(Model.player);
+		View.refresh_enemy_effects(Model.enemy);
+		View.refresh_grid(Model.tiles.grid_tiles);
 	},
 	
 	enemy_attack_sequence: function() {
-		attacks = Model.enemy.attacks;
-		attack_weights = [];
-		for (var i in attacks) {
-			attack_weights.push(attacks[i].probability);
-		}
-		attack_num = weightedRandom(attack_weights);
-		chosen_attack = attacks[attack_num];
-		View.select_attack(attack_num);
-		setTimeout(() => { View.deselect_attack(attack_num); }, 3000);
-		old_player_hp = Model.player.hp;
-		if (Model.enemy.special.powerup != 0 && Model.enemy.special.powerdown == 0) {
-			Model.player.smart_health_decrement(1.5*chosen_attack.damage);
-		} else if (Model.enemy.special.powerup == 0 && Model.enemy.special.powerdown != 0) {
-			Model.player.smart_health_decrement(chosen_attack.damage/1.5);
-		} else {
-			Model.player.smart_health_decrement(chosen_attack.damage)
-		}
-		this.enemy_special_effects(chosen_attack);
+        if (Model.enemy.special.freeze == 0) {
+            attacks = Model.enemy.attacks;
+		    attack_weights = [];
+		    for (var i in attacks) {
+		    	attack_weights.push(attacks[i].probability);
+		    }
+		    attack_num = weightedRandom(attack_weights);
+		    chosen_attack = attacks[attack_num];
+		    View.select_attack(attack_num);
+		    setTimeout(() => { View.deselect_attack(attack_num); }, 3000);
+		    old_player_hp = Model.player.hp;
+		    if (Model.enemy.special.powerup != 0 && Model.enemy.special.powerdown == 0) {
+		    	Model.player.smart_health_decrement(1.5*chosen_attack.damage);
+		    } else if (Model.enemy.special.powerup == 0 && Model.enemy.special.powerdown != 0) {
+		    	Model.player.smart_health_decrement(chosen_attack.damage/1.5);
+		    } else {
+		    	Model.player.smart_health_decrement(chosen_attack.damage)
+		    }
+		    this.enemy_special_effects(chosen_attack);
 // this line (below) can interfere with enemy regeneration, if not handled carefully
-		View.refresh_player_health(Model.player, old_player_hp);
-		if (Model.player.hp == 0) {
-			setTimeout(() => { window.location.replace("/page/youdied") }, 2700)
-		}
-		setTimeout(this.special_effect_phase, 2700);
+		    View.refresh_player_health(Model.player, old_player_hp);
+		    if (Model.player.hp == 0) {
+			    this.player_death();
+		    }
+        }
+		setTimeout(() => { this.special_effect_phase(); }, 2700);
 	},
 	
 	special_effect_phase: function() {
-		var p_old_health = Model.player.hp;
+        var p_old_health = Model.player.hp;
 		var e_old_health = Model.enemy.hp;
 // poison
 		if (Model.player.special.poison > 0) { Model.player.smart_health_decrement(2); }
@@ -592,60 +879,119 @@ var Controller = {
 			Model.whoseturn = "player";
 		} else {
 			if (Model.enemy.hp == 0) { this.enemy_defeated(); }
-			setTimeout(() => { Model.whoseturn = "player"; }, 2700);
+			if (Model.player.hp == 0) { this.player_death(); }
+            setTimeout(() => { Model.whoseturn = "player"; }, 2700);
 		}
 	},
-	
-	unpack_player_savefile: function() {
-		var player_savefile = JSON.parse(localStorage.getItem("savefile"));
-		if (player_savefile) {
-			Model.tiles.grid_tiles = player_savefile.grid_tiles;
-			Model.player.max_hp = player_savefile.hp;
-			Model.player.hp = player_savefile.hp;
-		}
-	},
-	
-	pack_player_savefile: function() {
-		Model.tiles.deselect_all_tiles();
-		var player_savefile = { 
-			grid_tiles: Model.tiles.grid_tiles, 
-			hp: Model.player.full_hp,
-			current_enemy: Model.enemy.next_enemy_id
-		}
-		localStorage.setItem("bwa_chapter", Model.enemy.next_enemy_id.slice(1,-1));
-		localStorage.setItem("savefile", JSON.stringify(player_savefile));
-	},
+
+    player_death: function() {
+        Savefile.death_overwrite();
+        Savefile.save_changes();
+        setTimeout(() => { window.location.replace("/page/youdied"); }, 2700)
+    },
 	
 	enemy_defeated: function() {
-		this.pack_player_savefile();
-		if (Model.enemy.next_enemy_id == "endofdemo") {
-			setTimeout(() => { window.location.replace("/page/endofdemo"); }, 2700);
-		} else if (Model.enemy.id.slice(-1) == "5") {
+        clearInterval(Model.enemy.quip_interval_id);
+        document.getElementById("enemy_speechbubble").style.display = "none";
+        if (Model.enemy.ondeath) { Model.enemy.ondeath(); }
+        var ptn_probs = "";
+        if (Model.enemy.id.slice(-1)=="5") { ptn_probs=Model.stats.boss_potion_probs; } else { ptn_probs=Model.stats.normal_potion_probs; }
+        Model.player.get_random_potion(ptn_probs);
+        View.enemy_fade();
+        var finishpage = Model.enemy.finishpage;
+        if (finishpage == "endofdemo") {
+            Model.player.hp = Model.player.full_hp;
+            Model.player.potions.regenerate += 6;
+            Model.player.potions.powerup += 3;
+            Model.player.potions.purify += 2;
+        }
+        next_enemy_id = Model.enemy.next_enemy_id;
+        Model.enemy.updateme(enemy_library[next_enemy_id]);
+        Model.enemy.reset_enemy_effects();
+        this.pack_savefile();
+        if (finishpage) {
+            if (finishpage = "endofdemo") { 
+                Savefile.change_this_savefile({hardcore:1}); 
+                Savefile.set_death_checkpoint();
+                Savefile.save_changes(); 
+            }
+			setTimeout(() => { window.location.replace("/page/"+finishpage); }, 2700);
+		} else if (Model.enemy.id.slice(-1) == "1") {
 			setTimeout(() => { window.location.replace("/page/map"); }, 2700);
-			localStorage.setItem("next_enemy_id", String(Model.enemy.next_enemy_id));
 		}	else {
-			setTimeout(() => { window.location.replace("/enemy/"+Model.enemy.next_enemy_id); }, 2700);
+			setTimeout(() => { this.next_enemy(); }, 2700);
+
 		}
 
 	},
+
+    next_enemy: function() {
+        Model.initialize();
+        if (Model.player.hardcore == 0) { Model.player.reset_player_effects(); }
+        Model.tiles.purify_tiles();
+        this.pack_savefile();
+        View.refresh_enemy_effects(Model.enemy);
+        this.make_potions_functional();
+        View.set_enemy_image(Model.enemy);
+        // make enemy quips only run when there is an actual enemy
+        Model.enemy.quip_interval_id = View.display_enemy_quips(Model.enemy);
+        View.render_enemy_info(Model.enemy);
+        View.refresh_grid(Model.tiles.grid_tiles);
+        View.show_grid_blocker();
+        View.set_name_tags(Model.player.name, Model.enemy.name);
+        View.refresh_enemy_health(Model.enemy, Model.enemy.full_hp);
+        if (Model.player.hardcore == 0) { View.refresh_player_health(Model.player, Model.player.full_hp); }
+        if (Model.enemy.onapproach) { setTimeout(() => { Model.enemy.onapproach(); }, 1000); }
+    },
+
+    unpack_savefile: function() {
+        Savefile.retrieve_savefile();
+        var svf = Savefile.this_savefile;
+        if (svf.grid_tiles) { Model.tiles.grid_tiles = svf.grid_tiles; }
+        if (svf.potions) { Model.player.potions = svf.potions; }
+        if (svf.hp) { Model.player.full_hp = svf.hp; }
+        if (svf.next_enemy) { for (var i in enemy_library[svf.next_enemy]) { Model.enemy[i] = enemy_library[svf.next_enemy][i]; } }
+        if (svf.treasures) { Model.player.treasures = svf.treasures; }
+        if (svf.hardcore) { Model.player.hardcore = 1; Model.player.hp = svf.hardcore_hp; }
+    },
+
+    pack_savefile: function() {
+        sf_updates = {
+            grid_tiles: Model.tiles.grid_tiles,
+            potions: Model.player.potions,
+            hp: Model.player.full_hp,
+            next_enemy: Model.enemy.id,
+            treasures: Model.player.treasures,
+            hardcore: Model.player.hardcore,
+            hardcore_hp: Model.player.hp
+        }
+        Savefile.change_this_savefile(deepClone(sf_updates));
+        Savefile.save_changes();
+    },
 	
 	initialize: function() {
-		Model.initialize();
-		this.unpack_player_savefile();
-		View.set_enemy_image(Model.enemy);
-		View.display_enemy_quips(Model.enemy);
+        this.unpack_savefile();
+        if (Model.enemy.id.slice(-1) == "1" && Model.player.hardcore == 0) { Savefile.set_death_checkpoint(); Savefile.save_changes(); } 
+        Model.initialize();
+		this.make_potions_functional();
+        Model.tiles.purify_tiles();
+        if (Model.player.hardcore == 1) { document.getElementById("player_img").src="/img/lex_badass.png"; }
+        View.render_treasures(Model.player);
+        View.set_enemy_image(Model.enemy);
+		Model.enemy.quip_interval_id = View.display_enemy_quips(Model.enemy);
 		View.set_background_image(Model.enemy);
 		View.render_enemy_info(Model.enemy);
 		View.refresh_grid(Model.tiles.grid_tiles);
 		View.show_grid_blocker();
 		View.set_name_tags(Model.player.name, Model.enemy.name);
-		View.refresh_player_health(Model.player, Model.player.full_hp);
-		View.refresh_enemy_health(Model.enemy, Model.enemy.full_hp);
-		this.make_grid_functional();
+		View.refresh_player_health(Model.player, Model.player.hp);
+		View.refresh_enemy_health(Model.enemy, Model.enemy.hp);
+		View.make_dialogue_functional();
+        this.make_grid_functional();
+        if (Model.enemy.onapproach) { setTimeout(() => { Model.enemy.onapproach(); }, 1000); }
 	}
 
 }
-
 
 //var Controller = {
 //

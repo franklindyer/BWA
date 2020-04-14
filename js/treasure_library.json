@@ -1,0 +1,35 @@
+treasure_library = {
+
+    t00: {
+        name: "Alphabet Blocks",
+        id: "t00",
+        description: "Three- and four-letter words deal one extra point of damage.",
+        triggertype: "submitword",
+        whentriggered: function() {
+            if (Model.tiles.selected_tiles.length <= 4) { Model.enemy.hp += -1; }
+        }
+    },
+
+    t10: {
+        name: "Succulent Cabbage",
+        id: "t10",
+        description: "Spell 'veggie' words to earn a health potion.",
+        triggertype: "submitword",
+        whentriggered: function() {
+            var word = "";
+            for (var i in Model.tiles.selected_tiles) { word += Model.tiles.selected_tiles[i].letter; }
+            Controller.special_checkword(word,"veggies",() => { Model.player.potions.regenerate += 1; Controller.make_potions_functional(); });
+        }
+    },
+
+    t11: {
+        name: "Tax Papers",
+        id: "t11",
+        description: "Scrambling replenishes stolen tiles.",
+        triggertype: "scramble",
+        whentriggered: function() {
+            for (var i in Model.tiles.grid_tiles) { if (Model.tiles.grid_tiles[i] == "stolen") { Model.tiles.grid_tiles[i]=new Tile("","normal"); } }
+        }
+    }
+
+}

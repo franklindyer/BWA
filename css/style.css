@@ -4,7 +4,7 @@
 	100% { height: 155px; }
 }
 
-@-0-keyframes playerbreathe {
+@-o-keyframes playerbreathe {
 	0% { height: 155px; }
 	50% { height: 145px; }
 	100% { height: 155px; }
@@ -22,7 +22,7 @@
 	100% { padding-top: 0%; }
 }
 
-@-0-keyframes enemybreathe {
+@-o-keyframes enemybreathe {
 	0% { padding-top: 0%; }
 	50% { padding-top: 1.5%; }
 	100% { padding-top: 0%; }
@@ -32,6 +32,21 @@
 	0% { padding-top: 0%; }
 	50% { padding-top: 1.5%; }
 	100% { padding-top: 0%; }
+}
+
+@keyframes fadeout {
+    from { opacity: 100%; }
+    to { opacity: 0%;}
+}
+
+@-o-keyframes fadeout {
+    from { opacity: 100%; }
+    to { opacity: 0%;}
+}
+
+@-webkit-keyframes fadeout {
+    from { opacity: 100%; }
+    to { opacity: 0%;}
 }
 
 body {
@@ -47,6 +62,40 @@ body {
 
 .separate_layer {
 	overflow: auto;
+}
+
+#blackout {
+    display: none;
+    position: absolute;
+    background: rgba(0,0,0,0.5);
+    z-index: 2;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    width: 750px;
+    height: 600px;
+    padding-top: 150px;
+    padding-bottom: 250px;
+}
+
+#messageboard {
+    opacity: 100%;
+    /*width: 750px;*/
+    vertical-align: middle;
+    height: 200px;
+    background-color: white;
+    padding: 20px;
+    font-family: Rockwell;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#current_speaker {
+    height: 100%;
+    display: none;
+    float: left;
+    padding-right: 20px;
 }
 
 .name_tag {
@@ -141,6 +190,7 @@ body {
 	position: absolute;
 	bottom: 0;
 	width: 100%;
+    text-align: center;
 /*	border: 5px solid #662200;
 	background-color: black;
 	color: yellow;*/
@@ -158,6 +208,10 @@ body {
 	z-index: 1;
 }
 
+#help_text {
+    display: inline-block;
+}
+
 #lower_stage {
 	width: 100%;
 	height: 300px;
@@ -172,7 +226,27 @@ body {
 	border-collapse: separate;
 	background-color: #662200;
 	position: relative;
-	}
+}
+
+#player_treasure {
+    height: 100%;
+    width: 100%;
+    color: yellow;
+}
+
+.treasure_section {
+    width: 33%;
+    border: 2px solid #804000;
+}
+
+.potion_row {
+    height: 40%;
+    border: 2px solid #804000;    
+}
+
+.treasure_row {
+    border: 2px solid #804000;
+}
 
 #letter_grid {
 	border: 5px solid 804000;
