@@ -9,18 +9,13 @@
     <body>
 
         <p>To gain access to the game, please enter your email into the text box below and click "submit." </p>
-        <input id="user_email" type="text"></input>
-        <button id="submitbutton" onclick="email_submitted();">Submit</button>
+
+        <form action="/login/formsubmitted" method="POST">
+            <input id="user_email" name="user_email" type="text"></input>
+        </form>
 
         <script>
             
-            function email_submitted() {
-                user_email = document.getElementById("user_email").value;
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST","/login/"+user_email, true);
-                xhr.send();
-            }
-
         </script>
 
     <body>

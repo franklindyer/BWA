@@ -1,4 +1,4 @@
-from flask import Flask, make_response, request, render_template, send_from_directory
+from flask import Flask, redirect, make_response, request, render_template, send_from_directory
 from flask_mail import Mail, Message
 import random, string
 
@@ -7,6 +7,8 @@ app.config.update(
     MAIL_SUPPRESS_SEND = False
 )
 mail = Mail(app)
+
+domain_name = "http://dev.franklin.dyer.me"
 
 approved_addresses = ["franklin@dyer.me", "george@dyer.me"]
 temporary_hashes = []
@@ -24,20 +26,23 @@ def page_not_found(e):
 @app.route('/login/<path:path>', methods=['POST', 'GET'])
 def test_login(path):
     if request.method == 'POST':
-        if path in approved_addresses:
+        user_email = request.form.get("user_email")
+        if user_email in approved_addresses:
             new_hash = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
             temporary_hashes.append(new_hash)
             if len(temporary_hashes) > 10: del temporary_hashes[0]
-            msg = Message("Game access",sender="bw@dev.franklin.dyer.me",recipients=[path],body="Looks like you've requested access to my game! To see the beta version, go this url: dev.franklin.dyer.me/login/"+new_hash)
+            msg = Message("Game access",sender="bw@dev.franklin.dyer.me",recipients=[user_email],body="Looks like you've requested access to my game! To see the beta version, go this url: "+domain_name+"/login/"+new_hash)
             mail.send(msg)
+            return "Now check your email!"
         else:
-            msg_fr = Message("Game access",sender="bw@dev.franklin.dyer.me",recipients=["franklin@dyer.me"], body="The following person has requested access to your game: "+path)
-            msg_user = Message("Game access", sender="bw@dev.franklin.dyer.me",recipients=[path], body="You've requested access to my game, but your email is not on the list of approved users. Permission has been requested.")
+            msg_fr = Message("Game access",sender="bw@dev.franklin.dyer.me",recipients=["franklin@dyer.me"], body="The following person has requested access to your game: "+user_email)
+            msg_user = Message("Game access", sender="bw@dev.franklin.dyer.me",recipients=[user_email], body="You've requested access to my game, but your email is not on the list of approved users. Permission has been requested.")
             mail.send(msg_user)
             mail.send(msg_fr)
+            return "Sorry, you don't currently have access to this game. An email has been sent requesting access."
     elif request.method == 'GET':
         if path in temporary_hashes:
-            resp = make_response("You've been granted access to the game. Try accessing the homepage again.")
+            resp = make_response(redirect(domain_name))
             resp.set_cookie("bwa_authenticator","approved")
             return resp
         else:
