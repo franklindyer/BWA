@@ -167,7 +167,8 @@ enemy_library = {
     e05: {
 
         id: "e05",
-        next_enemy_id: "endofdemo",
+        next_enemy_id: "e01",
+        finishpage: "endoftutorial",
         name: "Baby (Boss)",
         height: "195px",
         width: "240px",
@@ -183,7 +184,7 @@ enemy_library = {
             setTimeout(() => { View.initialize_dialogue(); }, 2000);
         },
         ondeath: function() {
-            Savefile.complete_savefile.available_treasures.push("t00");
+            if (!Savefile.complete_savefile.available_treasures.includes("t00")) { Savefile.complete_savefile.available_treasures.push("t00"); Savefile.save_changes(); }
             Savefile.save_changes();
         },
         flavortext: "This cranky toddler has impressive lexical abilities.",
@@ -286,8 +287,8 @@ enemy_library = {
 			new Attack("Trowel",0.3,2,{ bleed: 2 }),
 			new Attack("Stop thief!",0.2,2,{ stun: 2 })
 		],
-        onclick: function() {
-            
+        ondeath: function() { 
+            if (!Savefile.complete_savefile.available_treasures.includes("t10")) { Savefile.complete_savefile.available_treasures.push("t11"); Savefile.save_changes(); }
         },
 		flavortext: "Mr. McGregor was on his hands and knees planting out young cabbages, but he jumped up and ran after Peter, waving a rake and calling out 'Stop thief!'",
 		quips: [
@@ -398,6 +399,7 @@ enemy_library = {
             new Attack("King's Orders",0.3,0,{ powerup: 2, powerdown: 2 })
         ],
         ondeath: function() {
+            if (!Savefile.complete_savefile.includes("t11")) { Savefile.complete_savefile.push("t11"); Savefile.save_changes(); }
             Model.player.full_hp += 5;
         },
         flavortext: "Now the Sheriff of Nottingham swore that he himself would bring this knave Robin Hood to justice, and for two reasons: first, because he wanted two hundred pounds, and next, because the forester that Robin Hood had killed was of kin to him.",

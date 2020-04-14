@@ -21,10 +21,11 @@
 			height: 600px;
 			margin-left: auto;
 			margin-right: auto;
+            text-align: center;
 		}
 		
         #map_img {
-            width: 100%;
+            width: 600px;
         }
 
         #lex_img {
@@ -40,12 +41,13 @@
         }
 
 		#adventure_text {
-            width: 60%;
+            width: 50%;
 			text-align: center;
 			border: 3px solid #663300;
 			background-color: #b35900;
 			color: #ffcc00;
 			padding: 10px;
+            height: 180px;
 		}
 		
 		#chap_title {
@@ -70,7 +72,7 @@
 		}
 
         #treasure_select {
-            width: 40%;
+            width: 50%;
             border: 3px solid #663300;
             background-color: #b35900;
             color: #ffcc00;
@@ -79,7 +81,7 @@
 
         #treasure_scroll {
             width: 270px;
-            height: 130px;
+            height: 115px;
             overflow: auto;
             background-color: #b35900;
         }
@@ -103,6 +105,7 @@
                 <div id="treasure_scroll"> 
                     <table id="treasure_table"><tr id="treasure_row"></tr></table>
                 </div>
+                <div id="treasure_infotext"></div>
             </td>
         </tr></table>
 	</div>
@@ -139,12 +142,15 @@
         selected_treasures = [];
 
         function treasure_clicked() {
+            var infotext = document.getElementById("treasure_infotext");
             if (selected_treasures.includes(this.id)) {
                 for (var i in selected_treasures) { if (selected_treasures[i] == this.id) { selected_treasures.splice(i,1); } }
                 this.style.color = "black";
+                infotext.innerHTML = "";
             } else if (selected_treasures.length <= 3) {
                 selected_treasures.push(this.id);
                 this.style.color = "yellow";
+                infotext.innerHTML = treasure_library[this.id].description;
             }
         }
 

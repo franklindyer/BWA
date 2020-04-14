@@ -910,7 +910,7 @@ var Controller = {
         Model.enemy.reset_enemy_effects();
         this.pack_savefile();
         if (finishpage) {
-            if (finishpage = "endofdemo") { 
+            if (finishpage == "endofdemo") { 
                 Savefile.change_this_savefile({hardcore:1}); 
                 Savefile.set_death_checkpoint();
                 Savefile.save_changes(); 

@@ -8,19 +8,19 @@ travel_text = {
 	"1": {
 		name: "Chapter 1: Among the cabbages",
 		description: "Lex finds himself in the idyllic garden of a countryside cottage. Several furry critters have come to partake in its juicy cabbages, including... a cat wearing clothes?",
-	    lex_pos: [30,130]
+	    lex_pos: [90,210]
     },
 	
 	"2": {
 		name: "Chapter 2: Sherwood Forest",
 		description: "Eager to leave the perilous patch of cabbages, Lex hurries down a well-trodden path through the woods. Unfortunately, his journey is instantly impeded by hostile highway hooligans.",
-        lex_pos: [60,270]
+        lex_pos: [120,330]
     },
 
     "3": {
         name: "Chapter 3: The Worm's Tale",
         description: "After emerging from the perilous wood, Lex catches sight of a homely inn beside the road. Hoping for hospitality, Lex finds instead a motley crew of rowdy travellers of all social standings...",
-        lex_pos: [100,420]
+        lex_pos: [150,440]
     },
 
     "8": {
