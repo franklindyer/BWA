@@ -23,6 +23,12 @@ travel_text = {
         lex_pos: [150,440]
     },
 
+    "4": {
+        name: "Chapter 4: A Stranger Neck of the Woods",
+        description: "Lex wriggles away from the hurly-burly and back into the forest, quickly realizing that he has entered a much stranger neck of the woods. Things will only get weirder from here on.",
+        lex_pos: [280,490]
+    },
+
     "8": {
         name: "Chapter 8: Sir Gawain and the Green Worm"
     }

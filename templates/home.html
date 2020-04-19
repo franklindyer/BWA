@@ -100,7 +100,7 @@
 	
 	<script>
 
-    if (localStorage.getItem("savefile")==null) { localStorage.setItem("savefile",'{"games":{}}'); }
+    if (localStorage.getItem("savefile")==null) { localStorage.setItem("savefile",'{"current_game":"", "games":{}, "available_treasures":[]}'); }
 	
 		function go_to_game(savefile_name) {
 			var complete_savefile = JSON.parse(localStorage.getItem("savefile"));

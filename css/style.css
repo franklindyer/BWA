@@ -49,6 +49,23 @@
     to { opacity: 0%;}
 }
 
+@-webkit-keyframes sheen {
+  100% {
+    transform: rotateZ(60deg) translate(1em, -9em);
+  }
+}
+
+@keyframes glimmer {
+    0% { filter: brightness(100%) }
+    50% { filter: brightness(130%) }
+    100% { filter: brightness(100&) }
+}
+
+@keyframes tileblur {
+    from { filter: blur(10px) }
+    to { filter: blur(0px) }
+}
+
 body {
 	background-color: black;
 }
@@ -295,13 +312,27 @@ body {
 }
 
 .grid {
+    position: relative;
+    overflow: hidden;
 	width: 25%;
 	height: 25%;
-	border: solid 2px 804000;
-	background-color: #ffd9b3;
+	/*border: solid 2px 804000;*/
+	background: #ffd9b3;
 	font-size: 20px;
 	font-weight: bold;
 }
+
+/*.shinytile::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  bottom: -50%;
+  left: -50%;
+  background: linear-gradient(to bottom, rgba(229, 172, 142, 0), rgba(255,255,255,0.6) 50%, rgba(229, 172, 142, 0));
+  transform: rotateZ(60deg) translate(-1em, 7.5em);
+  animation: sheen 6s forwards;
+}*/
 
 .grid_selected {
 	/*width: 50px;
@@ -311,6 +342,8 @@ body {
 	border: solid 2px 804000;
 	background-color: #ffd9b3;
 	text-align: center;
+    position: relative;
+    overflow: hidden;
 }
 
 #submit_word {

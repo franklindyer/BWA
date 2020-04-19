@@ -12,6 +12,7 @@ class Attack {
 		this.damage = damage;
 		this.effects = {
 			tilesmash: 0,
+            tileplague: 0,
 			tilealter: 0,
             tilesteal: 0,
 			powerup: 0,
@@ -49,7 +50,7 @@ var Model = {
 		letter_freqs: {'A':8.50, 'B':2.07, 'C':4.54, 'D':3.38, 'E':11.16, 'F':1.81, 'G':2.47, 'H':3.00, 'I':7.58, 'J':0.20, 'K':1.10, 'L':5.49, 'M':3.01, 'N':6.65, 'O':7.16, 'P':3.17, 'Q':0.20, 'R':7.58, 'S':5.74, 'T':6.95, 'U':3.63, 'V':1.01, 'W': 1.29, 'X':0.29, 'Y':1.78, 'Z':0.27},
 	
 		letter_strengths: {'A':1, 'B':2, 'C':2, 'D':2, 'E':1, 'F':2, 'G':2, 'H':2, 'I':1, 'J':3, 'K':2, 'L':2, 'M':2, 'N':1, 'O':1, 'P':2, 'Q':3, 'R':1, 'S':1, 'T':1, 'U':2, 'V':2, 'W':2, 'X':3, 'Y':2, 'Z':3},
-		
+	
 		gem_awards: { 3:"normal", 4:"normal", 5:"amethyst", 6:"emerald", 7:"garnet", 8:"sapphire", 9:"ruby", 10:"amethyst", 11:"amethyst", 12:"amethyst", 13:"amethyst", 14:"amethyst", 15:"amethyst", 16:"amethyst" },
 
         normal_potion_probs: { regenerate:0.4, powerup:0.2, purify:0.1 },
@@ -78,7 +79,7 @@ var Model = {
         purify_tiles: function() {
             for (i in this.grid_tiles) {
                 if (this.grid_tiles[i] == "stolen") { this.grid_tiles[i]= new Tile(weightedRandom(Model.stats.letter_freqs, "normal")) }
-                if (this.grid_tiles[i].status == "smashed") { this.grid_tiles[i].status="normal" }
+                if (["smashed","plague"].includes(this.grid_tiles[i].status)) { this.grid_tiles[i].status="normal" }
             }
         },
 		
@@ -99,16 +100,24 @@ var Model = {
 		    if (affliction=="tilesteal") {
                 this.grid_tiles[Math.floor(Math.random()*this.grid_tiles.length)]="stolen";
             } else {
-                var rand_tile = this.grid_tiles[Math.floor(Math.random() * this.grid_tiles.length)];
-			    rand_tile.status = affliction;
+                var which_tile = Math.floor(Math.random() * this.grid_tiles.length);
+                var rand_tile = this.grid_tiles[which_tile];
+                if (rand_tile.status) {
+			        rand_tile.status = affliction;
+                    return which_tile;
+                }
 		    }
         },
 		
 		alter_tile: function() {
 			bad_tiles = ["J","Q","X","Z"];
-			var rand_tile = this.grid_tiles[Math.floor(Math.random() * this.grid_tiles.length)];
-			var new_letter = bad_tiles[Math.floor(Math.random() * 4)];
-			rand_tile.letter = new_letter;
+            var which_tile = Math.floor(Math.random() * this.grid_tiles.length);
+            var rand_tile = this.grid_tiles[which_tile];
+			if (rand_tile.letter) {
+                var new_letter = bad_tiles[Math.floor(Math.random() * 4)];
+			    rand_tile.letter = new_letter;
+                return which_tile
+            }
 		},
 		
 		scramble_tiles: function() {
@@ -219,7 +228,7 @@ var Model = {
 	word_power: function(word_tiles) {
 			power = 0;
 			for (i in word_tiles) {
-				if (word_tiles[i].status != "smashed") { 
+				if (!["smashed","plague"].includes(word_tiles[i].status)) { 
 					power += this.stats.letter_strengths[word_tiles[i]['letter']]; 
 				}
 				if (word_tiles[i].status == "amethyst") {
@@ -312,7 +321,8 @@ var View = {
         sapphire: "Sapphire tile: freezes enemy.",
         ruby: "Ruby tile: burns enemy.",
 // tile ailments
-        smashed: "Smashed tile: deals no damage."
+        smashed: "Smashed tile: deals no damage.",
+        plague: "Plagued tile: deals no damage and spreads."
     },
 
 	set_name_tags: function(pname, ename) {
@@ -401,13 +411,14 @@ var View = {
     },
 	
 	tile_colors: {
-		normal: ["#ffd9b3", "#ffd9b3", "to bottom right"],
-		smashed: ["#cccccc", "#cccccc", "to bottom right"],
-		amethyst: ["#cc00cc", "#ffccff", "to bottom right"],
-		emerald: ["#b3ffb3", "#00cc00", "to bottom right"],
-		garnet: ["#ffcc66", "#ff6600", "to bottom right"],
-        sapphire: ["#b3e6ff", "#0077b3", "to bottom right"],
-        ruby: ["#ff9980", "#ff3300", "to bottom right"]
+		normal: "linear-gradient(to bottom right, #ffd9b3, #ffd9b3)",
+		smashed: "linear-gradient(to bottom right, #cccccc, #cccccc)",
+        plague: "repeating-linear-gradient(45deg, #ffd9b3, #ffd9b3 7px, #86b300 7px, #86b300 14px)",
+		amethyst: "linear-gradient(to bottom right, #cc00cc, #ffccff)",
+		emerald: "linear-gradient(to bottom right, #b3ffb3, #33cc00)",
+		garnet: "linear-gradient(to bottom right, #ffcc66, #ff6600)",
+        sapphire: "linear-gradient(to bottom right, #b3e6ff, #0077b3)",
+        ruby: "linear-gradient(to bottom right, #ff9980, #ff3300)"
 	},
 
 	refresh_grid: function(grid_tiles, selected_tiles) {
@@ -418,14 +429,17 @@ var View = {
 			tile_tds[i].innerHTML = "";
 			tile_tds[i].style.backgroundColor = "#663300";
 			tile_tds[i].style.backgroundImage = "";
-		}
+            tile_tds[i].style.animation = "";
+        }
 		for (i in grid_tiles) {
 			current_tile = tile_tds[i];
 			if (grid_tiles[i] != 0 && grid_tiles[i] != "stolen") {
 				var type = grid_tiles[i].status;
-				current_tile.style.backgroundImage = "linear-gradient( "+tile_style[type][2]+", "+tile_style[type][0]+", "+tile_style[type][1]+")";
+			    current_tile.style.backgroundImage = tile_style[type];
 				tile_tds[i].innerHTML = grid_tiles[i].letter;
-			}
+                if (grid_tiles[i].one_time_animation) { current_tile.style.animation = grid_tiles[i].one_time_animation; grid_tiles[i].one_time_animation = ""; }
+			    if (["amethyst","emerald","garnet","sapphire","ruby"].includes(type)) { current_tile.style.animation = "glimmer 2s infinite"; }
+            }
 		}
 // selected tiles
 		var sel_tile_table = document.getElementById("selected_tiles");
@@ -440,7 +454,8 @@ var View = {
 			newtile.classList.add("grid_selected");
 			newtile.innerHTML = selected_tiles[i].letter;
 			var type = selected_tiles[i].status;
-			newtile.style.backgroundImage = "linear-gradient( "+tile_style[type][2]+", "+tile_style[type][0]+", "+tile_style[type][1]+")";
+			newtile.style.backgroundImage = tile_style[type];
+			if (["amethyst","emerald","garnet","sapphire","ruby"].includes(type)) { newtile.style.animation = "glimmer 2s infinite"; }
 			if (selected_tiles) {
 				newtile.style.width = String(sel_size)+"px";
 				newtile.style.height = String(sel_size)+"px";
@@ -449,6 +464,14 @@ var View = {
 			sel_tile_table.appendChild(newtile);
 		}
 	},
+
+    tile_animation: function(whichtile, animation, grid) {
+        var tile = document.getElementById("grid"+String(whichtile));
+        tile.style.animation = animation;
+        if (grid) {
+            grid[whichtile].one_time_animation = animation;
+        }
+    },
 	
 	refresh_enemy_health: function(enemy, old_health) {
 		var enemy_bar = document.getElementById("enemy_health");
@@ -809,10 +832,16 @@ var Controller = {
 		for (var i = 0; i < attack.effects.tilesmash; i++) {
 			Model.tiles.afflict_tile("smashed");
 		}
+// tileplague
+		for (var i = 0; i < attack.effects.tileplague; i++) {
+			Model.tiles.afflict_tile("plague");
+		}
 // tilealter
 		for (var i = 0; i < attack.effects.tilealter; i++) {
-			Model.tiles.alter_tile();
-		}
+			whichtile = Model.tiles.alter_tile();
+            console.log(whichtile)
+		    View.tile_animation(whichtile, "tileblur 2s", Model.tiles.grid_tiles)
+        }
 // tilesteal
         for (var i = 0; i < attack.effects.tilesteal; i++) {
             Model.tiles.afflict_tile("tilesteal");
@@ -858,6 +887,14 @@ var Controller = {
 	special_effect_phase: function() {
         var p_old_health = Model.player.hp;
 		var e_old_health = Model.enemy.hp;
+// tileplague spread
+        num_plagued = 0;
+        for (var i in Model.tiles.grid_tiles) {
+            if (Model.tiles.grid_tiles[i].status == "plague") { num_plagued++; }
+        }
+        for (var i = 0; i < num_plagued; i++) {
+            Model.tiles.afflict_tile("plague");
+        }
 // poison
 		if (Model.player.special.poison > 0) { Model.player.smart_health_decrement(2); }
 		if (Model.enemy.special.poison > 0) { Model.enemy.smart_health_decrement(2); }
@@ -871,6 +908,7 @@ var Controller = {
 		if (Model.player.special.stun > 0) { View.show_grid_blocker("#ffff99","STUNNED! Click to continue."); }
 		
 		Model.decrement_effects();
+        View.refresh_grid(Model.tiles.grid_tiles);
 		View.refresh_player_effects(Model.player);
 		View.refresh_enemy_effects(Model.enemy);
 		View.refresh_player_health(Model.player, p_old_health);
