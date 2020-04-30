@@ -125,6 +125,11 @@
 	<script src="/js/traveltext_library.json"></script>
 	<script src="/js/treasure_library.json"></script>
     <script>
+
+        function deepClone(obj) {
+            return JSON.parse(JSON.stringify(obj));
+        }
+        
         complete_savefile = JSON.parse(localStorage.getItem("savefile"));
 		this_savefile = complete_savefile.games[complete_savefile.current_game];
         chap_des = document.getElementById("chap_description");
@@ -149,9 +154,7 @@
 		})
         document.getElementById("map_img").src = "/img/map_book_"+String(Math.floor((tt_id-1)/10)+1)+".png";
 
-        <!-- down here: make it so that checkboxes are listed for the treasures so that they dynamically add/remove elements from an array of selected treasures-->	
-
-        selected_treasures = [];
+        var selected_treasures = [];
 
         function treasure_clicked() {
             var infotext = document.getElementById("treasure_infotext");
@@ -159,7 +162,7 @@
                 for (var i in selected_treasures) { if (selected_treasures[i] == this.id) { selected_treasures.splice(i,1); } }
                 this.style.color = "black";
                 infotext.innerHTML = "";
-            } else if (selected_treasures.length <= 3) {
+            } else if (selected_treasures.length < 3) {
                 selected_treasures.push(this.id);
                 this.style.color = "yellow";
                 infotext.innerHTML = treasure_library[this.id].description;

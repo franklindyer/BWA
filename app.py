@@ -1,5 +1,6 @@
 from flask import Flask, redirect, make_response, request, render_template, send_from_directory
 from flask_mail import Mail, Message
+from flask_minify import minify
 import random, string
 
 app = Flask(__name__)
@@ -8,9 +9,13 @@ app.config.update(
 )
 mail = Mail(app)
 
+app = Flask(__name__)
+minify(app=app, html=True, js=True, cssless=True)
+
 domain_name = "http://dev.franklin.dyer.me"
 
 approved_addresses = ["franklin@dyer.me", "george@dyer.me"]
+secure_access = "off";
 temporary_hashes = []
 
 def bwa_check_cookie(req):
@@ -50,21 +55,21 @@ def test_login(path):
 
 @app.route("/")
 def home():
-    if bwa_check_cookie(request):
+    if bwa_check_cookie(request) or secure_access == "off":
         return render_template('home.html')
     else:
         return render_template("login.html")
 	
 @app.route("/page/<path:path>")
 def send_page(path):
-    if bwa_check_cookie(request):
+    if bwa_check_cookie(request) or secure_access == "off":
         return render_template(path+".html")
     else:
         return "Sorry, you don't have permission to access this."
 
 @app.route("/enemy/")
 def send_enemy():
-    if bwa_check_cookie(request):
+    if bwa_check_cookie(request) or secure_access == "off":
 	    return render_template("battle_screen.html")
     else:
         return "Sorry, you don't have permission to access this."
@@ -83,14 +88,14 @@ def send_img(path):
 	
 @app.route('/checkword/<path:path>')
 def check_word(path):
-	if str(path.upper())+'*' in open('wordlists/wordlist.txt').read():
+	if '*'+str(path.upper())+'*' in open('wordlists/wordlist.txt').read():
 		return 't';
 	else:
 		return 'f';
 
 @app.route('/specialword/<path:path>/<path:word>')
 def check_specialword(path,word):
-    if str(word.upper())+'*' in open('wordlists/wordlist_'+str(path)+'.txt').read():
+    if '*'+str(word.upper())+'*' in open('wordlists/wordlist_'+str(path)+'.txt').read():
         return 't';
     else:
         return 'f';

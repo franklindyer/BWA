@@ -608,9 +608,8 @@ enemy_library = {
     e45: {
 
         id: "e45",
-        next_enemy_id: "e11",
-        finishpage: "endofdemo",
-        name: "Oberon",
+        next_enemy_id: "e51",
+        name: "Oberon (Boss)",
         height: "220px",
         width: "180px",
         full_hp: 65,
@@ -632,8 +631,7 @@ enemy_library = {
     e51: {
 
         id: "e51",
-        next_enemy_id: "e11",
-        finishpage: "endofdemo",
+        next_enemy_id: "e52",
         name: "Ship Rats",
         height: "150px",
         width: "210px",
@@ -646,6 +644,93 @@ enemy_library = {
         quips: [
             "Squeeeeee!",
             "*Skitter skitter*"
+        ]
+
+    },
+
+    e52: {
+
+        id: "e52",
+        next_enemy_id: "e53",
+        name: "Pirate Sharpshooter",
+        height: "195px",
+        width: "120px",
+        full_hp: 55,
+        attacks: [
+            new Attack("Skewer",0.4,3, { bleed: 3 }),
+            new Attack("Flintlock Blast",0.4,4, { burn: 3 }),
+            new Attack("Pillage",0.2,0, { tilesteal: 2, tilesmash: 4 })
+        ],
+        flavortext: "He spent all his life doing everything possible to become a true badass: he learned to spit, to shoot, to cuss and to fight. But now there's just one thing standing in his way: he's deathly afraid of spiders.",
+        quips: [
+            "Arrrgh!",
+            "I eat nails for breakfast!",
+            "See these boots? Made of human leather! Aargh!"
+        ]
+
+    },
+
+    e53: {
+
+        id: "e53",
+        next_enemy_id: "e54",
+        name: "Ticking Crocodile",
+        height: "120px",
+        width: "370px",
+        full_hp: 45,
+        attacks: [
+            new Attack("Crushing Jaws",0.5,6),
+            new Attack("Tail Swing",0.5,3, { tilesmash: 5 })
+        ],
+        flavortext: "It can be pretty difficult to catch prey when you're constantly emitting a ticking noise. Never should have swallowed that alarm clock.",
+        quips: [
+            "Rawr!",
+            "Tick - tock - tick - tock"
+        ]
+
+    },
+
+    e54: {
+
+        id: "e54",
+        next_enemy_id: "e55",
+        name: "Peter Pan",
+        height: "185px",
+        width: "110px",
+        full_hp: 50,
+        attacks: [
+            new Attack("Swordplay",0.35,3, { bleed: 3 }),
+            new Attack("Childish Trickery",0.35,2, { tilesteal: 3, tilealter: 3 }),
+            new Attack("Eternal Youth",0.3,0, { powerup: 2, regenerate: 10 })
+        ],
+        flavortext: "He breathed intentionally quick short breaths at the rate of about five to a second... there is a saying in the Neverland, that everytime you breathe, a grown-up dies; and Peter was killing them off vindictively as fast as possible.",
+        quips: [
+            "Oh, the cleverness of me!",
+            "I'm youth! I'm joy!",
+            "Have at thee!"
+        ]
+
+    },
+
+    e55: {
+
+        id: "e55",
+        next_enemy_id: "e11",
+        name: "Captain Hook (Boss)",
+        finishpage: "endofdemo",
+        height: "210px",
+        width: "130px",
+        full_hp: 60,
+        attacks: [
+            new Attack("Hooked!",0.4,5, { bleed: 3 }),
+            new Attack("Plunder",0.4,3, { tilesteal: 3, tilesmash: 3 }),
+            new Attack("Potent Grog",0.2,0, { powerup: 3, regenerate: 7 })
+        ],
+        flavortext: "The man is not wholly evil - he has a Thesaurus in his cabin.",
+        quips: [
+            "Proud and insolent youth, prepare to meet thy doom!",
+            "Have you seen a ticking crocodile anywhere hereabouts?",
+            "Who and what art thou?"
         ]
 
     }

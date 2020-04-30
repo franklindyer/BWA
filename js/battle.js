@@ -51,7 +51,7 @@ var Model = {
 	
 		letter_strengths: {'A':1, 'B':2, 'C':2, 'D':2, 'E':1, 'F':2, 'G':2, 'H':2, 'I':1, 'J':3, 'K':2, 'L':2, 'M':2, 'N':1, 'O':1, 'P':2, 'Q':3, 'R':1, 'S':1, 'T':1, 'U':2, 'V':2, 'W':2, 'X':3, 'Y':2, 'Z':3},
 	
-		gem_awards: { 3:"normal", 4:"normal", 5:"amethyst", 6:"emerald", 7:"garnet", 8:"sapphire", 9:"ruby", 10:"amethyst", 11:"amethyst", 12:"amethyst", 13:"amethyst", 14:"amethyst", 15:"amethyst", 16:"amethyst" },
+		gem_awards: { 3:"normal", 4:"normal", 5:"amethyst", 6:"emerald", 7:"garnet", 8:"sapphire", 9:"ruby", 10:"crystal", 11:"diamond", 12:"diamond", 13:"diamond", 14:"diamond", 15:"diamond", 16:"diamond" },
 
         normal_potion_probs: { regenerate:0.4, powerup:0.2, purify:0.1 },
 
@@ -144,7 +144,8 @@ var Model = {
 			burn: 0,
 			powerup: 0,
 			powerdown: 0,
-			stun: 0
+			stun: 0,
+            shielded: 0
 		},
 
         potions: {
@@ -174,6 +175,11 @@ var Model = {
         reset_player_effects: function() {
             for (var i in this.special) { this.special[i] = 0; }
         },
+
+        purify_player_effects: function() {
+            var sp = this.special;
+            sp.poison = sp.bleed = sp.burn = sp.powerdown = sp.stun = 0;
+        }
 		
 	},
 	
@@ -231,26 +237,33 @@ var Model = {
 				if (!["smashed","plague"].includes(word_tiles[i].status)) { 
 					power += this.stats.letter_strengths[word_tiles[i]['letter']]; 
 				}
-				if (word_tiles[i].status == "amethyst") {
-					this.enemy.special.poison += 2;
-					power += 1;
-				}
-				if (word_tiles[i].status == "emerald") {
-					if (this.player.full_hp - this.player.hp > 5) { this.player.hp += 5 } else { this.player.hp = this.player.full_hp }
-					power += 1;
-				}
-				if (word_tiles[i].status == "garnet") {
-					this.enemy.special.powerdown += 1;
-					this.enemy.special.powerup = 0;
-					power += 1;
-				}
-                if (word_tiles[i].status == "sapphire") {
-                    this.enemy.special.freeze += 1;
-                    power += 1;
-			    }
-                if (word_tiles[i].status == "ruby") {
-                    this.enemy.special.burn += 3;
-                    power += 1;
+                if (word_tiles[i].status != "normal") {
+				    if (word_tiles[i].status == "amethyst") {
+					    this.enemy.special.poison += 2;
+					    power += 1;
+				    } else if (word_tiles[i].status == "emerald") {
+					    if (this.player.full_hp - this.player.hp > 5) { this.player.hp += 5 } else { this.player.hp = this.player.full_hp }
+					    power += 1;
+				    } else if (word_tiles[i].status == "garnet") {
+					    this.enemy.special.powerdown += 1;
+				    	this.enemy.special.powerup = 0;
+					    power += 2;
+				    } else if (word_tiles[i].status == "sapphire") {
+                        this.enemy.special.freeze += 1;
+                        power += 2;
+			        } else if (word_tiles[i].status == "ruby") {
+                        this.enemy.special.burn += 3;
+                        power += 3;
+                    } else if (word_tiles[i].status == "crystal") {
+                        this.player.purify_player_effects();
+                        this.player.special.shielded += 1;
+                        this.tiles.purify_tiles();
+                        power += 4;
+                    } else if (word_tiles[i].status == "diamond") {
+                        this.player.hp = this.player.full_hp;
+                        for (var i in this.player.potions) { this.player.potions[i]++; }
+                        power += 5;
+                    }
                 }
             }
 			return power;
@@ -320,6 +333,8 @@ var View = {
         garnet: "Garnet tile: powers enemy down.",
         sapphire: "Sapphire tile: freezes enemy.",
         ruby: "Ruby tile: burns enemy.",
+        crystal: "Crystal tile: purifies and shields Lex.",
+        diamond: "Diamond tile: restores full health and awards potions.",
 // tile ailments
         smashed: "Smashed tile: deals no damage.",
         plague: "Plagued tile: deals no damage and spreads."
@@ -409,6 +424,12 @@ var View = {
             treasure_img.style.width = "85%";
         }
     },
+
+    highlight_treasure: function(whichtreasure) {
+        var treasure_box = document.getElementById("treasure"+String(whichtreasure));
+        treasure_box.style.borderColor = "#ff9900";
+        setTimeout(() => { treasure_box.style.borderColor = "#804000"; }, 2000);
+    },
 	
 	tile_colors: {
 		normal: "linear-gradient(to bottom right, #ffd9b3, #ffd9b3)",
@@ -418,8 +439,10 @@ var View = {
 		emerald: "linear-gradient(to bottom right, #b3ffb3, #33cc00)",
 		garnet: "linear-gradient(to bottom right, #ffcc66, #ff6600)",
         sapphire: "linear-gradient(to bottom right, #b3e6ff, #0077b3)",
-        ruby: "linear-gradient(to bottom right, #ff9980, #ff3300)"
-	},
+        ruby: "linear-gradient(to bottom right, #ff9980, #ff3300)",
+	    crystal: "linear-gradient(to bottom right, #ffccff, #ff6699)",
+        diamond: "linear-gradient(to bottom right, #66ffff, #a6a6a6)"
+    },
 
 	refresh_grid: function(grid_tiles, selected_tiles) {
 		var tile_style = this.tile_colors;
@@ -438,7 +461,7 @@ var View = {
 			    current_tile.style.backgroundImage = tile_style[type];
 				tile_tds[i].innerHTML = grid_tiles[i].letter;
                 if (grid_tiles[i].one_time_animation) { current_tile.style.animation = grid_tiles[i].one_time_animation; grid_tiles[i].one_time_animation = ""; }
-			    if (["amethyst","emerald","garnet","sapphire","ruby"].includes(type)) { current_tile.style.animation = "glimmer 2s infinite"; }
+			    if (["amethyst","emerald","garnet","sapphire","ruby","crystal","diamond"].includes(type)) { current_tile.style.animation = "glimmer 2s infinite"; }
             }
 		}
 // selected tiles
@@ -455,7 +478,7 @@ var View = {
 			newtile.innerHTML = selected_tiles[i].letter;
 			var type = selected_tiles[i].status;
 			newtile.style.backgroundImage = tile_style[type];
-			if (["amethyst","emerald","garnet","sapphire","ruby"].includes(type)) { newtile.style.animation = "glimmer 2s infinite"; }
+			if (["amethyst","emerald","garnet","sapphire","ruby","crystal","diamond"].includes(type)) { newtile.style.animation = "glimmer 2s infinite"; }
 			if (selected_tiles) {
 				newtile.style.width = String(sel_size)+"px";
 				newtile.style.height = String(sel_size)+"px";
@@ -467,9 +490,11 @@ var View = {
 
     tile_animation: function(whichtile, animation, grid) {
         var tile = document.getElementById("grid"+String(whichtile));
-        tile.style.animation = animation;
-        if (grid) {
-            grid[whichtile].one_time_animation = animation;
+        if (tile) {
+            tile.style.animation = animation;
+            if (grid) {
+                grid[whichtile].one_time_animation = animation;
+            }
         }
     },
 	
@@ -709,7 +734,7 @@ var Controller = {
             if (potion=="purify") {
                 Model.tiles.purify_tiles();
                 var sp = Model.player.special;
-                sp.bleed = sp.poison = sp.burn = sp.powerdown = sp.stun = 0;
+                Model.purify_player_effects();
                 View.show_grid_blocker();
                 View.refresh_player_effects(Model.player);
                 View.refresh_grid(Model.tiles.grid_tiles);
@@ -765,7 +790,7 @@ var Controller = {
 			if(xhr.readyState === XMLHttpRequest.DONE) {
 				var status = xhr.status;
 				if (status === 0 || (status >= 200 && status < 400)) {
-					if (xhr.responseText == 't') { executeme(); }
+					if (xhr.responseText == 't' && executeme) { executeme(); }
 				}
 			}
 		};
@@ -774,7 +799,7 @@ var Controller = {
 
     activate_treasures: function(triggertype) {
         for (var i in Model.player.treasures) { 
-            if (Model.player.treasures[i].triggertype==triggertype) { treasure_library[Model.player.treasures[i].id].whentriggered(); }
+            if (Model.player.treasures[i].triggertype==triggertype) { treasure_library[Model.player.treasures[i].id].whentriggered(Number(i)+1) }
         }
     },
 
@@ -788,7 +813,7 @@ var Controller = {
 		if (Model.player.special.powerup != 0 && Model.player.special.powerdown == 0) {
 			Model.enemy.smart_health_decrement(1.5*word_power);
 		} else if (Model.player.special.powerup == 0 && Model.player.special.powerdown != 0) {
-			Model.enemy.smart_health_decrement(word_power/1.5);
+			Model.enemy.smart_health_decrement(word_power/2);
 		} else {
 			Model.enemy.smart_health_decrement(word_power)
 		}
@@ -797,7 +822,10 @@ var Controller = {
 		Model.tiles.selected_tiles = [];
 		View.refresh_grid(Model.tiles.fill_tiles(Model.stats.gem_awards[word_tiles.length]), []);
 		View.refresh_player_health(Model.player, old_player_hp);
-		if (Model.enemy.hp == 0) { 
+		View.refresh_player_effects(Model.player);
+        View.refresh_grid(Model.tiles.grid_tiles);
+        View.render_potions(Model.player);
+        if (Model.enemy.hp == 0) { 
             this.enemy_defeated(); 
         } else {
 		    setTimeout(() => { this.enemy_attack_sequence(); }, 4000);
@@ -817,38 +845,40 @@ var Controller = {
 			View.refresh_enemy_health(Model.enemy, old_hp);
 		}
 // powerup
-		Model.enemy.special.powerdown = 0;
+		if (Model.enemy.special.powerup != 0) { Model.enemy.special.powerdown = 0; }
 		Model.enemy.special.powerup += attack.effects.powerup;
-// powerdown
-		Model.player.special.powerup = 0;
-		Model.player.special.powerdown += attack.effects.powerdown;
-// poison
-		Model.player.special.poison += attack.effects.poison;
-// bleed
-		Model.player.special.bleed += attack.effects.bleed;
-//burn
-		Model.player.special.burn += attack.effects.burn;
-// tilesmash
-		for (var i = 0; i < attack.effects.tilesmash; i++) {
-			Model.tiles.afflict_tile("smashed");
-		}
-// tileplague
-		for (var i = 0; i < attack.effects.tileplague; i++) {
-			Model.tiles.afflict_tile("plague");
-		}
-// tilealter
-		for (var i = 0; i < attack.effects.tilealter; i++) {
-			whichtile = Model.tiles.alter_tile();
-            console.log(whichtile)
-		    View.tile_animation(whichtile, "tileblur 2s", Model.tiles.grid_tiles)
-        }
-// tilesteal
-        for (var i = 0; i < attack.effects.tilesteal; i++) {
-            Model.tiles.afflict_tile("tilesteal");
-        }
-// stun
-		if (Model.player.special.stun > 0) { Model.player.special.stun += -1 }
-		Model.player.special.stun += attack.effects.stun;
+// negative player effects        
+        if (Model.player.special.shielded == 0) {
+            // powerdown
+                if (Model.enemy.special.powerdown != 0) { Model.player.special.powerup = 0; }
+                Model.player.special.powerdown += attack.effects.powerdown;
+            // poison
+                Model.player.special.poison += attack.effects.poison;
+            // bleed
+                Model.player.special.bleed += attack.effects.bleed;
+            //burn
+                Model.player.special.burn += attack.effects.burn;
+            // tilesmash
+                for (var i = 0; i < attack.effects.tilesmash; i++) {
+                    Model.tiles.afflict_tile("smashed");
+                }
+            // tileplague
+                for (var i = 0; i < attack.effects.tileplague; i++) {
+                    Model.tiles.afflict_tile("plague");
+                }
+            // tilealter
+                for (var i = 0; i < attack.effects.tilealter; i++) {
+                    var whichtile = Model.tiles.alter_tile();
+                    View.tile_animation(whichtile, "tileblur 2s", Model.tiles.grid_tiles)
+                }
+            // tilesteal
+                for (var i = 0; i < attack.effects.tilesteal; i++) {
+                    Model.tiles.afflict_tile("tilesteal");
+                }
+            // stun
+                if (Model.player.special.stun > 0) { Model.player.special.stun += -1 }
+                Model.player.special.stun += attack.effects.stun;
+        }       
 
 		View.refresh_player_effects(Model.player);
 		View.refresh_enemy_effects(Model.enemy);
@@ -867,14 +897,16 @@ var Controller = {
 		    View.select_attack(attack_num);
 		    setTimeout(() => { View.deselect_attack(attack_num); }, 3000);
 		    old_player_hp = Model.player.hp;
-		    if (Model.enemy.special.powerup != 0 && Model.enemy.special.powerdown == 0) {
-		    	Model.player.smart_health_decrement(1.5*chosen_attack.damage);
-		    } else if (Model.enemy.special.powerup == 0 && Model.enemy.special.powerdown != 0) {
-		    	Model.player.smart_health_decrement(chosen_attack.damage/1.5);
-		    } else {
-		    	Model.player.smart_health_decrement(chosen_attack.damage)
-		    }
-		    this.enemy_special_effects(chosen_attack);
+		    if (Model.player.special.shielded == 0) {
+                if (Model.enemy.special.powerup != 0 && Model.enemy.special.powerdown == 0) {
+		    	    Model.player.smart_health_decrement(1.5*chosen_attack.damage);
+		        } else if (Model.enemy.special.powerup == 0 && Model.enemy.special.powerdown != 0) {
+		    	    Model.player.smart_health_decrement(chosen_attack.damage/2);
+		        } else {
+		    	    Model.player.smart_health_decrement(chosen_attack.damage)
+		        }
+		        this.enemy_special_effects(chosen_attack);
+            }
 // this line (below) can interfere with enemy regeneration, if not handled carefully
 		    View.refresh_player_health(Model.player, old_player_hp);
 		    if (Model.player.hp == 0) {
@@ -896,13 +928,13 @@ var Controller = {
             Model.tiles.afflict_tile("plague");
         }
 // poison
-		if (Model.player.special.poison > 0) { Model.player.smart_health_decrement(2); }
+		if (Model.player.special.poison > 0 && Model.player.special.shielded == 0) { Model.player.smart_health_decrement(2); }
 		if (Model.enemy.special.poison > 0) { Model.enemy.smart_health_decrement(2); }
 // bleed
-		if (Model.player.special.bleed > 0) { Model.player.smart_health_decrement(1); }
+		if (Model.player.special.bleed > 0 && Model.player.special.shielded == 0) { Model.player.smart_health_decrement(1); }
 		if (Model.enemy.special.bleed > 0) { Model.enemy.smart_health_decrement(1); }
 //burn
-		if (Model.player.special.burn > 0) { Model.player.smart_health_decrement(3); }
+		if (Model.player.special.burn > 0 && Model.player.special.shielded == 0) { Model.player.smart_health_decrement(3); }
 		if (Model.enemy.special.burn > 0) { Model.enemy.smart_health_decrement(3); }
 //stun
 		if (Model.player.special.stun > 0) { View.show_grid_blocker("#ffff99","STUNNED! Click to continue."); }
