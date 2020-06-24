@@ -34,6 +34,20 @@
 	100% { padding-top: 0%; }
 }
 
+@keyframes fadein {
+    from { opacity: 0%; }
+    to { opacity: 100%;}
+}
+
+@-o-keyframes fadein {
+    from { opacity: 0%; }
+    to { opacity: 100%;}
+}
+
+@-webkit-keyframes fadein {
+    from { opacity: 0%; }
+    to { opacity: 100%;}
+}
 @keyframes fadeout {
     from { opacity: 100%; }
     to { opacity: 0%;}
@@ -203,14 +217,39 @@ body {
 	opacity: 80%;
 }
 
+#overkill_box {
+    text-align: center; 
+    padding: 10px;
+    width: 120px;
+    border-radius: 10px;
+    margin-right: 20px;
+    /*position: absolute;*/
+    background-color: #e67300;
+    display: none;
+}
+
+#overkill_msg {
+    font-size: 20px;
+    font-weight: bold;
+    color: yellow;
+}
+
+#overkill_prize {
+    height: 50px;
+    width: 50px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 40px;
+    background-color: blue;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 #effect_table {
 	position: absolute;
 	bottom: 0;
 	width: 100%;
     text-align: center;
-/*	border: 5px solid #662200;
-	background-color: black;
-	color: yellow;*/
 }
 
 #player_effect_table {

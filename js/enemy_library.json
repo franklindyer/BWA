@@ -402,7 +402,7 @@ enemy_library = {
             new Attack("King's Orders",0.3,0,{ powerup: 2, powerdown: 2 })
         ],
         ondeath: function() {
-            if (!Savefile.complete_savefile.includes("t11")) { Savefile.complete_savefile.push("t11"); Savefile.save_changes(); }
+            if (!Savefile.complete_savefile.available_treasures.includes("t11")) { Savefile.complete_savefile.available_treasures.available_treasures.push("t11"); Savefile.save_changes(); }
         },
         flavortext: "Now the Sheriff of Nottingham swore that he himself would bring this knave Robin Hood to justice, and for two reasons: first, because he wanted two hundred pounds, and next, because the forester that Robin Hood had killed was of kin to him.",
         quips: [
@@ -733,6 +733,101 @@ enemy_library = {
             "Who and what art thou?"
         ]
 
+    },
+
+    e61: {
+
+        id: "e61",
+        next_enemy_id: "e62",
+        name: "Lilliputian Mob",
+        height: "120px",
+        width: "250px",
+        full_hp: 55,
+        attacks: [
+            new Attack("Pitchfork",0.35,3, { bleed: 2 }),
+            new Attack("Torch",0.35,4, { burn: 2, tilesmash: 1 }),
+            new Attack("Tie Down",0.3,2, { stun: 2 })
+        ],
+        flavortext: "Undoubtedly, philosophers are in the right when they tell us that nothing is great or little otherwise than by comparison.",
+        quips: [
+            "Identify yourself!",
+        ]
+
+    },
+
+    e62: {
+
+        id: "e62",
+        next_enemy_id: "e63",
+        name: "Mangy Yahoo",
+        height: "165px",
+        width: "90px",
+        full_hp: 50,
+        attacks: [
+            new Attack("Grapple",0.6,4),
+            new Attack("Infectious Bite",0.4,4, { poison: 2, tileplague: 2 })
+        ],
+        flavortext: "I never beheld in all my travels so disagreeable an animal.",
+        quips: [
+            "*Grunt*",
+            "Ooga ooga!"
+        ]
+
+    },
+
+    e63: {
+
+        id: "e63",
+        next_enemy_id: "e64",
+        name: "Irate Laputan",
+        height: "185px",
+        width: "160px",
+        full_hp: 60,
+        attacks: [
+            new Attack("Stone Throw",0.4,4, { tilesmash: 2 }),
+            new Attack("Condescension",0.3,3, { powerdown: 3 }),
+            new Attack("Esoteric Dalliance",0.3,2, { tilealter: 4, powerup: 2 })
+        ],
+        flavortext: "A man of meagre aspect... had been for eight years upon a project for extracting sun-beams out of cucumbers, which were to be put into vials, hermetically sealed, and let out to warm the air in raw inclement summers.",
+        quips: [
+            "Begone, uncultured swine!"
+        ]
+
+    },
+
+    e64: {
+
+        id: "e64",
+        next_enemy_id: "e65",
+        name: "Aristotle's Ghost",
+        height: "210px",
+        width: "90px",
+        full_hp: 65,
+        attacks: [
+            new Attack("Sophistry",0.5,3, { tilealter: 5, tilesteal: 1 }),
+            new Attack("Eudaimonia",0.5,0, { regenerate: 7, powerup: 2 })
+        ],
+        flavortext: "Death is the most terrible of all things, for it is the end, and nothing is thought to be either good or bad for the dead."
+
+    },
+
+    e65: {
+
+        id: "e65",
+        next_enemy_id: "e11",
+        finishpage: "endofdemo",
+        name: "Majestic Houyhnhnm",
+        height: "220px",
+        width: "150px",
+        full_hp: 75,
+        attacks: [
+            new Attack("Trample",0.35,4,{ tilesmash: 3 }),
+            new Attack("Equine Superiority",0.35,0, { powerup: 3, powerdown: 3 }),
+            new Attack("Stampede!",0.3,5, { stun: 2 })
+        ],
+        flavortext: "The behaviour of these animals was... orderly and rational... acute and judicious."
+
     }
+
 
 }

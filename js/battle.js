@@ -43,6 +43,18 @@ weightedRandom = function(weights) {
 	}
 }
 
+largestUnder = function(obj, num) {
+    var current_val = 0;
+    var current_num = 0;
+    for (i in obj) {
+        if (Number(i) > Number(current_num) && Number(i) <= num) {
+            current_num = i;
+            current_val = obj[i];
+        }
+    }
+    return current_val;
+}
+
 var Model = {
 
 	stats: {
@@ -52,6 +64,12 @@ var Model = {
 		letter_strengths: {'A':1, 'B':2, 'C':2, 'D':2, 'E':1, 'F':2, 'G':2, 'H':2, 'I':1, 'J':3, 'K':2, 'L':2, 'M':2, 'N':1, 'O':1, 'P':2, 'Q':3, 'R':1, 'S':1, 'T':1, 'U':2, 'V':2, 'W':2, 'X':3, 'Y':2, 'Z':3},
 	
 		gem_awards: { 3:"normal", 4:"normal", 5:"amethyst", 6:"emerald", 7:"garnet", 8:"sapphire", 9:"ruby", 10:"crystal", 11:"diamond", 12:"diamond", 13:"diamond", 14:"diamond", 15:"diamond", 16:"diamond" },
+
+        word_messages: { 3:"Meh.", 4:"Good!", 5:"Nice!", 6:"Great!", 7:"Fantastic!", 8:"Awesome!", 9:"Incredible!", 10:"Astonishing!", 16:"You're trying too hard..." },
+
+        overkill_awards: { 4:"amethyst", 7:"emerald", 10:"garnet", 13:"sapphire", 16:"ruby", 19:"crystal" },
+
+        overkill_messages: { 4:"Wasted!", 7:"Demolished!", 10:"Exterminated!", 13:"Pulverized!", 16:"Obliterated!", 19:"Annihilated!" },
 
         normal_potion_probs: { regenerate:0.4, powerup:0.2, purify:0.1 },
 
@@ -96,13 +114,13 @@ var Model = {
 			}
 		},
 		
-		afflict_tile: function(affliction) {
+		afflict_tile: function(affliction, force=0) {
 		    if (affliction=="tilesteal") {
                 this.grid_tiles[Math.floor(Math.random()*this.grid_tiles.length)]="stolen";
             } else {
                 var which_tile = Math.floor(Math.random() * this.grid_tiles.length);
                 var rand_tile = this.grid_tiles[which_tile];
-                if (rand_tile.status) {
+                if (rand_tile.status == "normal" || force != 0) {
 			        rand_tile.status = affliction;
                     return which_tile;
                 }
@@ -191,6 +209,8 @@ var Model = {
 	
 		full_hp: 0,
 		hp: 0,
+
+        overkill: 0,
 		
 		attacks: [],
 		
@@ -209,12 +229,14 @@ var Model = {
 			if (this.hp > damage) {
 				this.hp += -damage;
 			} else {
+                this.overkill = damage - this.hp;
 				this.hp = 0;
 			}
 		},
 
         reset_enemy_effects: function() {
             for (var i in this.special) { this.special[i] = 0; }
+            this.overkill = 0;
         },
 
         updateme: function(new_enemy) {
@@ -376,6 +398,18 @@ var View = {
             return quip_interval_id;
 		}
 	},
+
+    display_overkill_msg: function(message, gemtype) {
+        var message_box = document.getElementById("overkill_box");
+        var prize_preview = document.getElementById("overkill_prize");
+        var overkill_message = document.getElementById("overkill_msg");
+        prize_preview.style.backgroundImage = this.tile_colors[gemtype];
+        overkill_message.innerHTML = message;
+        message_box.style.animation = "fadein 0.3s";
+        message_box.style.display = "block";
+        setTimeout(() => { message_box.style.animation = "fadeout 0.3s"; }, 2400)
+        setTimeout(() => { message_box.style.display = "none"; }, 2700)
+    },
 
     render_potions: function(player) {
         var needs_new_event_listener = {};
@@ -961,6 +995,7 @@ var Controller = {
     },
 	
 	enemy_defeated: function() {
+        var waittime = 2700;
         clearInterval(Model.enemy.quip_interval_id);
         document.getElementById("enemy_speechbubble").style.display = "none";
         if (Model.enemy.ondeath) { Model.enemy.ondeath(); }
@@ -968,6 +1003,14 @@ var Controller = {
         if (Model.enemy.id.slice(-1)=="5") { ptn_probs=Model.stats.boss_potion_probs; } else { ptn_probs=Model.stats.normal_potion_probs; }
         Model.player.get_random_potion(ptn_probs);
         View.enemy_fade();
+        var overkill_msg = largestUnder(Model.stats.overkill_messages, Model.enemy.overkill);
+        var overkill_prize = largestUnder(Model.stats.overkill_awards, Model.enemy.overkill);
+        if (overkill_prize != 0) {
+            Model.tiles.afflict_tile(overkill_prize, 1);
+            setTimeout(() => { View.display_overkill_msg(overkill_msg, overkill_prize); }, 1000);
+            waittime += 2700;
+            View.refresh_grid(Model.tiles.grid_tiles, Model.tiles.selected_tiles);
+        }
         var finishpage = Model.enemy.finishpage;
         if (finishpage == "endofdemo") {
             Model.player.hp = Model.player.full_hp;
@@ -985,11 +1028,11 @@ var Controller = {
                 Savefile.set_death_checkpoint();
                 Savefile.save_changes(); 
             }
-			setTimeout(() => { window.location.replace("/page/"+finishpage); }, 2700);
+			setTimeout(() => { window.location.replace("/page/"+finishpage); }, waittime);
 		} else if (Model.enemy.id.slice(-1) == "1") {
-			setTimeout(() => { window.location.replace("/page/map"); }, 2700);
+			setTimeout(() => { window.location.replace("/page/map"); }, waittime);
 		}	else {
-			setTimeout(() => { this.next_enemy(); }, 2700);
+			setTimeout(() => { this.next_enemy(); }, waittime);
 
 		}
 
