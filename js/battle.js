@@ -864,7 +864,7 @@ var Controller = {
         } else {
 		    setTimeout(() => { this.enemy_attack_sequence(); }, 4000);
 	    }	
-    // note to self: setTimeout changes the referent of "this" to the global object, unless you do it in this funny way with () => smth
+    // note to self: "setTimeout" changes the referent of "this" to the global object, unless you do it in this funny way with () => smth
 	},
 	
 	enemy_special_effects: function(attack) {
