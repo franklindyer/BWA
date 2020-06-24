@@ -1,36 +1,4 @@
 enemy_library = {
-
-	t1: {
-	
-		id: "t1",
-		next_enemy_id: "t2",
-		name: "Cujo",
-		height: "200px",
-		full_hp: 40,
-		attacks: [
-			new Attack("Bite",0.4,2, { bleed: 2 }), 
-			new Attack("Mangy breath",0.3,4,{ poison: 2, burn: 2 }),
-			new Attack("Hearty growl",0.3,0,{ regenerate: 5, powerup: 2, powerdown: 2 })
-		],
-		flavortext: "This devil-dog from hell is the mangiest mangy-boi you'll ever meet. Guard your jugular. Plus... he has fire breath? WTF?!"
-      	
-	},
-	
-	t2: {
-	
-		id: "t2",
-		next_enemy_id: "t1",
-		name: "The Owl and the Pussy-Cat",
-		height: "200px",
-		full_hp: 30,
-		attacks: [
-			new Attack("Runcible spoon",0.4,1, { stun: 2 }), 
-			new Attack("Cat scratch",0.3,2,{ bleed: 2 }),
-			new Attack("Hoot hoot",0.3,0,{ powerup: 3, tilealter: 3 })
-		],
-		flavortext: "You elegant fowl! How charmingly sweet you sing! O let us be married! too long we have tarried: but what shall we do for a ring?"
-	
-	},
 	
 	j404: {
 	
