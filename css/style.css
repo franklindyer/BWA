@@ -221,17 +221,17 @@ body {
     text-align: center; 
     padding: 10px;
     width: 120px;
-    border-radius: 10px;
+    /*border-radius: 10px;*/
     margin-right: 20px;
     /*position: absolute;*/
-    background-color: #e67300;
+    /*background-color: #e67300;*/
     display: none;
 }
 
 #overkill_msg {
     font-size: 20px;
     font-weight: bold;
-    color: yellow;
+    color: black;
 }
 
 #overkill_prize {

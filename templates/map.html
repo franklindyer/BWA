@@ -170,20 +170,23 @@
         }
 
         treasure_list = document.getElementById("treasure_row");
-        for (var i in complete_savefile.available_treasures) {
-            var tr_id = complete_savefile.available_treasures[i];
-            var td = document.createElement("td");
-            var treasure_img = document.createElement("img");
-            td.id = tr_id;
-            treasure_img.src = "/img/treasure_"+tr_id+".png";
-            td.innerHTML = treasure_library[tr_id].name;
-            td.style.color = "black";
-            td.style.width = "50px";
-            td.addEventListener("click", treasure_clicked);
-            td.appendChild(treasure_img);
-            treasure_img.style.width = "100%";
-            treasure_list.appendChild(td);
-
+        if (complete_savefile.available_treasures.length == 0) {
+            document.getElementById("treasure_select").style.display = "none";
+        } else {
+            for (var i in complete_savefile.available_treasures) {
+                var tr_id = complete_savefile.available_treasures[i];
+                var td = document.createElement("td");
+                var treasure_img = document.createElement("img");
+                td.id = tr_id;
+                treasure_img.src = "/img/treasure_"+tr_id+".png";
+                td.innerHTML = treasure_library[tr_id].name;
+                td.style.color = "black";
+                td.style.width = "50px";
+                td.addEventListener("click", treasure_clicked);
+                td.appendChild(treasure_img);
+                treasure_img.style.width = "100%";
+                treasure_list.appendChild(td);
+            }
         }
 
     </script>

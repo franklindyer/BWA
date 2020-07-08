@@ -288,7 +288,7 @@ enemy_library = {
 			new Attack("Stop thief!",0.2,2,{ stun: 2 })
 		],
         ondeath: function() { 
-            if (!Savefile.complete_savefile.available_treasures.includes("t10")) { Savefile.complete_savefile.available_treasures.push("t11"); Savefile.save_changes(); }
+            if (!Savefile.complete_savefile.available_treasures.includes("t10")) { Savefile.complete_savefile.available_treasures.push("t10"); Savefile.save_changes(); }
         },
 		flavortext: "Mr. McGregor was on his hands and knees planting out young cabbages, but he jumped up and ran after Peter, waving a rake and calling out 'Stop thief!'",
 		quips: [
