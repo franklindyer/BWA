@@ -8,12 +8,10 @@ I've done my best to reconstruct the original game's playful vibes through the a
 
 [I want to play BWA!](https://bwa.franklin.dyer.me)  
 [I want to read about BWA!](#how-to-play)  
-[I want to customize BWA!](#personalizing-bwa)  
+[I want to customize BWA!](#customizing-bwa)  
 [I want to significantly change BWA!](#adding-mechanics)  
 [I want to contribute to BWA!](#contributing-to-bwa)  
 [Who has contributed to BWA?](#credits)  
-
-[ADD TABLE OF CONTENTS]
 
 ## How to Play
 
@@ -55,6 +53,7 @@ The following is a classification of all special effects currently implemented:
   - Tile Smash: "smashes" a few tiles, so that they do not contribute to the damage dealt by any word in which they are used. Represented by a cracked tile icon.
   - Tile Plague: "infects" a few tiles, rendering them damageless like smashed tiles. However, plagued tiles can infect other tiles in the grid if left unused. Represented by a green striped tile icon.
   - Tile Steal: steals a few tiles, removing them from the grid. Represented by a hand-grabbing-tile icon.
+  - Tile Alter: changes a few tiles to difficult-to-use letters like Q, X, J, and Z.
   
 If you have suggestions of special effects you'd like to see, raise an issue!
 
@@ -102,7 +101,7 @@ The browser automatically saves your progress using localStorage. This method of
 
 Here's a more serious potential problem with localStorage: you can't resume your game on another device or even in another browser. At least, your progress won't be automatically transferred - if you're console-savvy, you can extract your savefile from localStorage and paste it into the console of another browser to transfer your progress. If enough people complain about this, I'll update it.
 
-## Personalizing BWA
+## Customizing BWA
 
 Want to design your own bookworm enemies or levels, or change the attacks or stats of existing baddies? Do you want to design a custom chapter (or even an entire book) with a theme of your choice? So did I, when I was younger! The original Bookworm Adventures was frustratingly uncustomizable, but I've tried to make this open-source spin-off as easy to tweak as possible, including for non-programmers.
 
@@ -116,8 +115,7 @@ Note that this also means you can't have more than nine enemies in a chapter. Th
 
 Here's an example of an entry in /js/enemy_library.json:
 
-<code>
-    
+```
     e44: {                                                                                                                 
                                                                                                                            
      id: "e44",                                                                                                         
@@ -141,7 +139,7 @@ Here's an example of an entry in /js/enemy_library.json:
      ]
  
     },
-</code>
+```
 
 Here's a description of what each of these attributes means, one by one:
 
@@ -157,6 +155,7 @@ Here's a description of what each of these attributes means, one by one:
   - *damage* is the amount of damage the attack deals, e.g. <code>1</code> for a weak attack or <code>6</code> for a very strong attack.
   - *effects* is an optional argument containing an object that lists the attack's special effects. For example, <code>{ poison: 3, tilesmash: 2 }</code> poisons the player for 3 turns and smashes 2 tiles.
 - *ondeath*: an optional parameter containing a function to be executed when the enemy is defeated. In the above example, the player is "leveled up" to 25 health after defeating Donkeyface.
+- *onapproach*: an optional parameter similar to "ondeath" that executes a function when the enemy approaches (before combat begins). This doesn't appear in the case of Donkeyface, because Donkeyface doesn't do anything special at the start of combat.
 - *flavortext*: the enemy's flavor text. Something silly.
 - *quips*: an array of strings for the enemy to randomly blurt out during battle. More silliness here.
 
@@ -176,8 +175,7 @@ You can also reskin any part of the game you want by replacing images in the /im
 
 You can even change some of the game's basic mechanics without having to dig deep into the code. Around line 60 in /js/battle.js you'll find an object named "stats" that looks like this:
 
-<code>
-   
+```   
     stats: {
 
      letter_freqs: {'A':8.50, 'B':2.07, 'C':4.54, 'D':3.38, 'E':11.16, 'F':1.81, 'G':2.47, 'H':3.00, 'I':7.58, 'J':0.20, 'K':1.10, 'L':5.49, 'M':3.01, 'N':6.65, 'O':7.16, 'P':3.17, 'Q':0.20, 'R':7.58, 'S':5.74, 'T':6.95, 'U':3.63, 'V':1.01, 'W': 1.29, 'X':0.29, 'Y':1.78, 'Z':0.27},
@@ -197,7 +195,7 @@ You can even change some of the game's basic mechanics without having to dig dee
      boss_potion_probs: { regenerate:0.7, powerup:0.5, purify:0.3 }
 	
     },
-</code>
+ ```
 
 Here's what each of these objects does:
 
@@ -210,11 +208,213 @@ Here's what each of these objects does:
 - *normal_potion_probs*: the probability that defeating a regular enemy will award each type of potion. For example, about 1 in 10 regular enemies will award a purify potion when defeated.
 - *boss_potion_probs*: potion-dropping probabilities for boss enemies. Slightly higher than the regular probabilities, because the player should be awarded more for defeating a difficult boss.
 
+### Adding a New Book
+
+If you're designing an entirely new book and you want it to be listed on BWA's homepage, you need to modify the file /templates/home.html. Around line 165, you should see the following tags encoding the selection box displayed on the homepage:
+
+```
+<select id="select_game">
+	<option value="e01">Tutorial</option>
+	<option value="e11">British Fantasy</option>
+</select>
+```
+
+Just add an option to this list with a value equal to the ID of the first enemy in your book. For example, if you've added a Steampunk-themed book whose first chapter is chapter 11 (coming after chapter 10 of the British Fantasy book), modify the above code to look like this:
+
+```
+<select id="select_game">
+	<option value="e01">Tutorial</option>
+	<option value="e11">British Fantasy</option>
+	<option value="e111">Steampunk</option>
+</select>
+```
+
 ## Adding Mechanics
+
+If you want to make more significant changes to the BWA's game mechanics, you'll have to learn more about the structure of the code. First of all, you need to know some HTML and Javascript (or at least be able to pick it up on the fly) in order to do this.
+
+Most of the action takes place in /js/battle.js, which determines how combat works. The bulk of this code resides in four large Javascript objects:
+- *Model*: contains all of the static game-state information, such as the letters in the grid and their status, information about the player and enemy, etc.
+- *View*: contains information and functions needed to make the game beautiful. The View object is in charge of making gem tiles shiny, dynamically rendering the background and enemy images, showing speech bubbles and dialogue boxes, etc.
+- *Controller*: all of the game's action is coordinated by the Controller object. Every function in the Controller corresponds to a game event such as the player attacking or an enemy being defeated, and it makes sure that View updates the GUI to reflect the current information in the Model object.
+- *Savefile*: a small object that contains information about your savefile and helps load it into localStorage.
+
+It would be overkill for me to list and describe every function in each of these objects. Instead, I'll try to anticipate a few ways in which someone *might want* to alter the game mechanics and describe how to do so in each case, including all of the functions and objects involved. If the modification you want to make isn't listed here, hopefully these examples provide enough information to allow you to figure it out on your own.
+
+### Adding a New Special Effect
+
+Let's say you want to add a special effect of your own design in addition to poison, bleed, burn, stun, freeze, etc. I'll show you how to add two of the three different types of effects we describe earlier: one-time effects and enduring effects. Maybe I'll eventually get around to writing up an example for tile effects as well.
+
+#### One-time Effects
+
+As an example of a one-time effect, suppose you want to make a special attack called "potion steal" that allows a baddie to take away some of your potions. First things first, have a look at the function ```enemy_special_effects``` under the Controller object. This function is in charge of implementing all of the special effects associated with an enemy attack. It's a pretty long function, so let's just look at how it handles regeneration, which is another example of a one-time effect:
+
+```
+// regeneration                                                                                                            
+	if (attack.effects.regenerate != 0) {                                                                              
+            old_hp = Model.enemy.hp;                                                                                       
+            if (Model.enemy.full_hp - Model.enemy.hp > attack.effects.regenerate) {                                        
+                Model.enemy.hp += attack.effects.regenerate;                                                               
+            } else {                                                                                                       
+                Model.enemy.hp = Model.enemy.full_hp;                                                                      
+            }                                                                                                              
+            View.refresh_enemy_health(Model.enemy, old_hp);                                                                
+        }
+```
+
+Here's a step-by-step description of what this function is doing:
+
+- In the first line, it checks whether the "effects" object of the enemy's attack (which is passed as an argument to the function) has a regenerate value of zero. If so, this whole chunk of code is skipped. Otherwise, regeneration takes place.
+- In the following 6 lines, the code increases the enemy's health by the amount specified in the ```attack.effects``` object. However, makes sure not to increase the enemy's health past its maximum health ```full_hp```.
+- In the second-to-last line, the function ```View.refresh_enemy_health``` is called, which updates the enemy's health bar and produces a "blinking "effect to show that a change in health has taken place.
+
+So here's an example of how we might implement a "potion steal" effect:
+
+```
+// potion steal                                                                                                            
+	for (var i = 0; i < attack.effects.potionsteal; i++) {
+	    var potiontype = ["regenerate","powerup","purify"][Math.floor(3*Math.random())]
+	    if (Model.player.potions[potiontype] != 0){ Model.player.potions[potiontype] += -1 }
+	}
+	this.make_potions_functional()
+```
+
+Basically, this just picks a random type of potion (regenerate, powerup, or purify) and deducts one of that potion type, if there are any left. It repeats this process a number of times equal to the "intensity" of the effect listed in ```attack.effects``` object before finally calling ```Controller.make_potions_functional``` to re-render the potions on the screen.
+
+There's one last thing you must do: scroll to the top of /js/battle.js and alter the Attack class to accomodate the "potion steal" effect. Here's what the Attack class currently looks like:
+
+```
+class Attack {                                                                                                             
+    constructor(name, prob, damage, effect_obj) {                                                                          
+        this.name = name;                                                                                                  
+        this.probability = prob;                                                                                           
+        this.damage = damage;                                                                                              
+        this.effects = {                                                                                                   
+            tilesmash: 0,                                                                                                  
+            tileplague: 0,                                                                                                 
+            tilealter: 0,                                                                                                  
+            tilesteal: 0,                                                                                                  
+            powerup: 0,                                                                                                    
+            powerdown: 0,                                                                                                  
+            regenerate: 0,                                                                                                 
+            poison: 0,                                                                                                     
+            bleed: 0,                                                                                                      
+            burn: 0,                                                                                                       
+            stun: 0                                                                                                        
+        }                                                                                                                  
+        for (var i in effect_obj) {                                                                                        
+            this.effects[i] = effect_obj[i];                                                                               
+        }                                                                                                                  
+    }                                                                                                                      
+}
+```
+
+All you have to do now is add an extra line in the middle saying ```potionsteal: 0```, so that all attacks steal zero potions by default, but can be specified to steal a certain number of potions in /js/enemy_library.json.
+
+#### Enduring Effects
+
+Suppose you want to implement an enduring effect called "curse" that repeatedly deals damage like poison, bleed, and burn, but does so at a decreasing rate. For example, a 3-turn curse deals 3 damage on the first turn, 2 damage on the second turn, and 1 damage on the last turn before finally disappearing. Let's use the "poison" effect as an illustrative example of this type of effect. As with the previous example, we must first look at the ```enemy_special_effects``` function to see how an enemy implements poison.
+
+```
+// poison                                                                                                      
+	Model.player.special.poison += attack.effects.poison;
+```
+
+All this does is increase the player's "poison counter" by the given number of turns. As it turns out, when it comes to implementing enduring effects, the heavy lifting occurs in a different function called ```special_effect_phase```. The special effect phase occurs at the end of each attack cycle following the enemy's attack. At this time, all of the enduring-special-effect-counters of the player and enemy are decremented and the corresponding effects are carried out. Here's how this function handles poison:
+
+```
+// poison                                                                                                                  
+        if (Model.player.special.poison > 0 && Model.player.special.shielded == 0) { Model.player.smart_health_decrement(2) }
+        if (Model.enemy.special.poison > 0) { Model.enemy.smart_health_decrement(2); } 
+```
+
+What does this do? If the player is poisoned and not shielded, the player's health is decremented by two, and the enemy (which, at the moment, does not have the ability to shield itself) is also docked two health points if its poison counter is greater than zero. Near the end of the ```enemy_special_effects``` function, after it has dealt with all of the other enduring effects, we have the following code:
+
+```
+Model.decrement_effects(); 
+```
+
+This just tells the Model to decrement all of enduring-special-effect counters belonging to the player and enemy, so that they don't last forever.
+
+Implementing the "curse" effect would be pretty straightforward. Add a line to ```enemy_special_effects``` that looks like this:
+
+```
+// curse                                                                                                      
+	Model.player.special.curse += attack.effects.curse;
+```
+
+and you'll also have to add a few lines to the ```special_effect_phase``` function to make the "curse" effect behave as desired:
+
+```
+// curse                                                                                                                  
+        if (Model.player.special.curse > 0 && Model.player.special.shielded == 0) { Model.player.smart_health_decrement(Model.player.special.curse) }
+        if (Model.enemy.special.curse > 0) { Model.enemy.smart_health_decrement(Model.enemy.special.curse); } 
+```
+
+Also, remember what I said earlier about modifying the Attack class to accomodate new special effects? You'll have to add another line to that class instantiation at the beginning of /js/battle.js that says ```curse: 0```.
+
+There's one more thing that needs to be done for enduring effects. In the player object within the Model, you'll find an attribute called "special" that looks like this:
+
+```
+special: {                                                                                                         
+            poison: 0,                                                                                                     
+            bleed: 0,                                                                                                      
+            burn: 0,                                                                                                       
+            powerup: 0,                                                                                                    
+            powerdown: 0,                                                                                                  
+            stun: 0,                                                                                                       
+            shielded: 0                                                                                                    
+        },
+```
+
+You have to add a line here for "curse" as well, since the player doesn't yet have the ability to be "cursed". If you want to be able to curse the enemy as well, you'll have to modify ```Model.enemy.special``` as well.
+
+### Adding a New Treasure
+
+If you're already more-or-less familiar with how the game works and some of the essential functions, writing a new treasure should be a piece of cake. Information about particular treasures and their specific functionality is stored in /js/treasure_library.json. Let's dissect an example of a treasure to see how it works:
+
+```
+t10: {                                                                                                                 
+        name: "Succulent Cabbage",                                                                                         
+        id: "t10",                                                                                                         
+        description: "Spell 'veggie' words to earn a health potion.",                                                      
+        triggertype: "submitword",                                                                                         
+        whentriggered: function(loc) {                                                                                     
+            _this = this;                                                                                                  
+            var word = "";                                                                                                 
+            for (var i in Model.tiles.selected_tiles) { word += Model.tiles.selected_tiles[i].letter; }                    
+            Controller.special_checkword(word,"veggies",() => { Model.player.potions.regenerate += 1; Controller.make_potions_functional(); View.highlight_treasure(loc); });     
+        }                                                                                                                  
+},
+```
+
+Here's a list of what each of these attributes means:
+
+- *name*: the displayed name of the treasure.
+- *id*: the treasure's ID. As a convention, since you earn treasures by defeating bosses at the end of chapters, the ID of each treasure is equal to "t", followed by the number of the book it occurs in, followed by the number of the chapter it occurs in. Chapter numbers start at zero, so that the ID "t10" corresponds to the first treasure of book 1.
+- *description*: the description of the treasure that appears on the map-and-treasure-selection-screen.
+- *triggertype*: describes when the treasure's special power is triggered. This particular example has a triggertype of "submitword", meaning that its power comes into play whenever you submit a word to attack. Another example of a triggertype is "scramble", which triggers the treasure when you press the scramble button.
+- *whentriggered*: a function executing the treasure's special power. This function is called whenever an event of the correct triggertype occurs. 
+
+There are currently only two different triggertypes - "submitword" and "scramble". If you want to add a different triggertype, you need to go digging through /js/battle.js. Controller contains a function called ```activate_treasures``` that takes a triggertype as an argument and activates all treasures with that triggertype, but this function must be called in the appropriate location of the code in order to activate treasures appropriately. For example, suppose you want to create a treasure that activates whenever you defeat an enemy. Create a new triggertype called "enemydefeated" and find the function in Controller that is called when the enemy is defeated. In this case, the function is ```enemy_defeated```. Near the end of that function, add a line that reads
+
+```
+this.activate_treasures("enemydefeated");
+```
+
+This is enough to trigger all of the relevant treasures upon enemy defeat.
 
 ## Contributing to BWA
 
+Here's how you can contribute to BWA:
 
+- Play the game and find lots of bugs. I'm not interested in knowing how you can cheat using the console - that doesn't bother me. I would like to hear about what goes wrong when you play the game without cheating. If you find something, file an issue.
+- Can you think of a way that this game could be improved? If so, please file an issue and I'll address it as soon as I can. Or, if you want, you can try to implement a new feature yourself, and file a pull request.
+- Have a look at the current list of issues and see if you can resolve any of them.
+- Design new enemies and add new art! This project has really sapped my creative energies, and I don't know if I can bring myself to write another single line of corny flavor text. Please design your own chapter or book and make a pull request! If it's high-quality, I'll merge it with the original.
+- If you're good with audio, please make me some sound effects! I'd love to use them.
+
+Much obliged!
 
 ## Credits
 
