@@ -16,11 +16,11 @@ If you don't want to read the instructions, just play the tutorial.
 
 Here's a picture of the original Bookworm Adventures:
 
-[INSERT IMAGE HERE]
+![original bookworm](/img/24B672FD-F3EE-4349-AD45-4D0F542C7A72.jpeg)
 
 And here's a picture of my browser-based version:
 
-[INSERT IMAGE HERE]
+![my bookworm](/img/34AC4589-6D2D-481C-8227-32E624848FAF.jpeg)
 
 This is the "battle screen," where most of the game's action takes place. Your character (Lex, the green bookworm on the left) and the enemy (on the right) take turns attacking each other, and the winner is whoever depletes the other player's health bar first. If you defeat the enemy, you'll progress to the next enemy or the next chapter, but if you're defeated, you have to restart at the beginning of the chapter.
 
@@ -53,7 +53,7 @@ If you have suggestions of special effects you'd like to see, raise an issue!
 
 ### Gem Tiles
 
-[INSERT IMAGE OF GEM TILES]
+![gem tiles](/img/EAB63A78-FF4F-45D3-9005-1BF4AB132A9B.jpeg)
 
 *Gem tiles* are special colored tiles that inflict extra damage upon the enemy, as well as carry out some special effect. For example, purple amethyst tiles poison the enemy and green emerald tiles regenerate some of the player's health. You can earn gem tiles by spelling long words or dealing "overkill" damage to enemies (that is, by dealing more damage than is required to finish off the enemy). The longer your word or more overkill damage it deals, the more rare and powerful the gem tile awarded.
 
@@ -69,7 +69,7 @@ Here's a list of all gem tiles currently implemented:
 
 ### Potions
 
-[INSERT PICTURE OF POTIONS]
+![potions](/img/7D749C54-20D6-4254-BB86-D02540BA3599.jpeg)
 
 After defeating an enemy, there's a chance that you will earn one or more *potions*. Potions appear in the area below your player, and you can click on a potion at any time (even outside of your turn) to use it. There are three types of potions:
 
@@ -81,7 +81,7 @@ After defeating an enemy, there's a chance that you will earn one or more *potio
 
 The entirety of the game is divided into *chapters*, each of which consists of five enemies. Every chapter is themed (usually drawing from a particular book or subgenre of fiction) and ends with a "boss battle" against a particularly difficult "boss" enemy. After defeating a chapter's boss, the player is awarded a special treasure that can be used to gain advantages in later chapters. Between chapters, the player is transported to the map page, showing the player's progress on a map, displaying a description of the next chapter, and allowing the player to choose which treasures to bring to the next chapter (a maximum of 3 treasures can be used at once).
 
-[INSERT IMAGE OF MAP SCREEN]
+![map screen](/img/7D124320-1841-46BC-A92F-8F46006D3CEC.jpeg)
 
 A *book* consists of ten chapters which adhere to a particular genre. The three book themes used in the original Bookworm Adventures were "Greek Mythology", "Arabian Nights", and "Gothic Horror". The theme used in the demo book in the Beta version is "British Fantasy."
 
