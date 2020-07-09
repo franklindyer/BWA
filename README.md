@@ -6,11 +6,18 @@ Since Bookworm Adventures was such a big part of my childhood, I decided to try 
 
 I've done my best to reconstruct the original game's playful vibes through the artwork, dialogue and flavor text. It currently has no *plot* - it's just just RPG-style combat for its own sake, without any princesses to save or big baddies to hunt down. It happens that as I've gotten older, my appetite for inventing fantasy storylines has been greatly diminished, and I now find the back-end code and game mechanics more interesting than the superficial decoration. Feel free to suggest any plotline ideas you may come up with, but in my opinion, the game does not urgently need a plot.
 
+[I want to play BWA!](https://bwa.franklin.dyer.me)  
+[I want to read about BWA!](#how-to-play)  
+[I want to customize BWA!](#personalizing-bwa)  
+[I want to significantly change BWA!](#adding-mechanics)  
+[I want to contribute to BWA!](#contributing-to-bwa)  
+[Who has contributed to BWA?](#credits)  
+
+[ADD TABLE OF CONTENTS]
+
 ## How to Play
 
-### Tutorial
-
-If you don't want to read the instructions, just play the tutorial.
+By the way, if you don't want to read all of the instructions below, just play the tutorial.
 
 ### The Battle Screen
 
@@ -91,9 +98,117 @@ If you finish an entire book, you have the option to play through again in "hard
 
 ### Savefiles
 
-The browser automatically saves your progress using localStorage. This method of progress-saving was very easy to implement, but it has a few caveats. First of all, since save data is stored locally, it's possible to cheat by editing your localStorage savefile to artificially progress to later chapters, give yourself extra potions or gem tiles, insta-kill enemies, etc. As far as I'm concerned, this isn't a huge problem, and I don't care much if people cheat if they find it more entertaining that way. However here's a more serious potential problem with localStorage: you can't resume your game on another device or even in another browser. At least, your progress won't be automatically transferred - if you're console-savvy, you can extract your savefile from localStorage and paste it into the console of another browser to transfer your progress. If enough people complain about this, I'll update it.
+The browser automatically saves your progress using localStorage. This method of progress-saving was very easy to implement, but it has a few caveats. First of all, since save data is stored locally, it's possible to cheat by editing your localStorage savefile to artificially progress to later chapters, give yourself extra potions or gem tiles, insta-kill enemies, etc. As far as I'm concerned, this isn't a huge problem, and I don't care much if people cheat if they find it more entertaining that way. 
+
+Here's a more serious potential problem with localStorage: you can't resume your game on another device or even in another browser. At least, your progress won't be automatically transferred - if you're console-savvy, you can extract your savefile from localStorage and paste it into the console of another browser to transfer your progress. If enough people complain about this, I'll update it.
 
 ## Personalizing BWA
+
+Want to design your own bookworm enemies or levels, or change the attacks or stats of existing baddies? Do you want to design a custom chapter (or even an entire book) with a theme of your choice? So did I, when I was younger! The original Bookworm Adventures was frustratingly uncustomizable, but I've tried to make this open-source spin-off as easy to tweak as possible, including for non-programmers.
+
+### Designing Enemies
+
+All of the enemy stats are stored in the file /js/enemy_library.json. The file consists of a single javascript object called "enemy_library," inside of which each enemy is stored under a unique ID number. I've adopted the convention of assigning each enemy an ID equal to the letter "e", followed by the number of the chapter in which that enemy is found, followed by the number indicating which position the enemy occupies in that chapter. For instance, the third baddie in chapter 5 has ID "e53", and the first baddie in chapter 27 would have ID "e271" (if there were 27 chapters).
+
+I recommend following this convention, because the code uses it to do things like dynamically set the backgrounds for different chapters. For example, when you fight enemy "e271", the code knows that you're on chapter 27, so it sets the background to /img/background_27.png. Also, if the next enemy is "e51", the code realizes that, since the next enemy is the first enemy of chapter 5, you need to be sent to the map page before engaging (because chapters are punctuated by visits to the map and treasure-selection screen). Failing to adhere to this naming convention could mess up some game mechanics that would be annoying to fix if you don't want to get into the weeds.
+
+Note that this also means you can't have more than nine enemies in a chapter. The ID for the eleventh enemy in chapter 2 would be "e211", but the code would interpret that as the first enemy in chapter 21. Not good.
+
+Here's an example of an entry in /js/enemy_library.json:
+
+<code>
+    
+    e44: {                                                                                                                 
+                                                                                                                           
+     id: "e44",                                                                                                         
+     next_enemy_id: "e45",                                                                                              
+     name: "Donkeyface",                                                                                                
+     height: "195px",                                                                                                   
+     width: "100px",                                                                                                    
+     full_hp: 55,                                                                                                       
+     attacks: [                                                                                                         
+       new Attack("Ass Kick",0.4,3),                                                                                  
+       new Attack("Charge",0.4,4, { tilesmash: 3, stun: 2 }),                                                         
+       new Attack("Crazed Bray",0.2,0, { powerup: 2, tilealter: 3 })                                                  
+     ],                                                                                                                 
+     ondeath: function() {                                                                                              
+       Model.player.full_hp = 25;                                                                                     
+     },                                                                                                                 
+     flavortext: "Have you heard? Everyone's saying that Oberon's wife... has fallen in love with this donkey-faced man!
+     quips: [                                                                                                           
+       "Oh god, I've made an ass of myself!",                                                                         
+       "Hee haw!",                                                                                                    
+     ]
+ 
+    },
+</code>
+
+Here's a description of what each of these attributes means, one by one:
+
+- *id*: the enemy's ID.
+- *next_enemy_id*: the next enemy's ID, which will be used to automatically summon the next enemy after this enemy is defeated.
+- *name*: the display name for the enemy. This unfortunate character is named "Donkeyface."
+- *height*: the height of the image displayed, in pixels.
+- *width*: the width of the image displayed, in pixels.
+- *full_hp*: the initial number of health points the enemy has.
+- *attacks*: an array of Attack objects separated by commas, each of which encodes one of the enemy's attacks. The syntax used to define an attack is <code>new Attack(name,prob,damage,effects)</code>, where
+  - *name* is a quote-enclosed string with the name of the attack, e.g. <code>"Ass Kick"</code>.
+  - *prob* is the probability with which the enemy uses that attack, e.g. <code>0.1</code> for a rare attack or <code>0.5</code> for a common attack.
+  - *damage* is the amount of damage the attack deals, e.g. <code>1</code> for a weak attack or <code>6</code> for a very strong attack.
+  - *effects* is an optional argument containing an object that lists the attack's special effects. For example, <code>{ poison: 3, tilesmash: 2 }</code> poisons the player for 3 turns and smashes 2 tiles.
+- *ondeath*: an optional parameter containing a function to be executed when the enemy is defeated. In the above example, the player is "leveled up" to 25 health after defeating Donkeyface.
+- *flavortext*: the enemy's flavor text. Something silly.
+- *quips*: an array of strings for the enemy to randomly blurt out during battle. More silliness here.
+
+By the way, watch out for the syntax, especially if you're a non-programmer. All of the enemies in the enemy_library object *must* be separated by commas, and failing to do so will raise an error. Each of the enemy attributes (*id*, *next_enemy_id*, *name*, etc.) must also be comma-separated.
+
+That's all there is to it!
+
+### Adding Art
+
+To add character and background art, just plop it in the /img folder. Enemy images should be named according to the format "enemy_" followed by the enemy ID and ".png". For example, Donkeyface's marvelous image is named "enemy_e44.png". Background images should be named according to the format "background_" followed by the number of the chapter and ".png". The background image behind Donkeyface is "background_4.png".
+
+Before adding enemy art, you should make sure to crop out all of the whitespace surrounding the silhouette of your enemy. This can be done using the lasso tool in various image editors. I recomment using [Photopea](https://www.photopea.com).
+
+You can also reskin any part of the game you want by replacing images in the /img folder with identically-named images. For example, if you want to change how the regenerate potion looks, delete /img/regenerate_potion.png and replace it with a picture of your own making named "regenerate_potion.png". If you want to change things like the color or shape of the health bars, the grid tiles, the attack button, or the various compartments on the lower half of the battle screen, you'll have to modify the css code in /css/style.css instead of the images.
+
+### Tweaking Stats
+
+You can even change some of the game's basic mechanics without having to dig deep into the code. Around line 60 in /js/battle.js you'll find an object named "stats" that looks like this:
+
+<code>
+   
+    stats: {
+
+     letter_freqs: {'A':8.50, 'B':2.07, 'C':4.54, 'D':3.38, 'E':11.16, 'F':1.81, 'G':2.47, 'H':3.00, 'I':7.58, 'J':0.20, 'K':1.10, 'L':5.49, 'M':3.01, 'N':6.65, 'O':7.16, 'P':3.17, 'Q':0.20, 'R':7.58, 'S':5.74, 'T':6.95, 'U':3.63, 'V':1.01, 'W': 1.29, 'X':0.29, 'Y':1.78, 'Z':0.27},
+
+     letter_strengths: {'A':1, 'B':2, 'C':2, 'D':2, 'E':1, 'F':2, 'G':2, 'H':2, 'I':1, 'J':3, 'K':2, 'L':2, 'M':2, 'N':1, 'O':1, 'P':2, 'Q':3, 'R':1, 'S':1, 'T':1, 'U':2, 'V':2, 'W':2, 'X':3, 'Y':2, 'Z':3},
+
+     gem_awards: { 3:"normal", 4:"normal", 5:"amethyst", 6:"emerald", 7:"garnet", 8:"sapphire", 9:"ruby", 10:"crystal", 11:"diamond", 12:"diamond", 13:"diamond", 14:"diamond", 15:"diamond", 16:"diamond" },
+
+     word_messages: { 3:"Meh.", 4:"Good!", 5:"Nice!", 6:"Great!", 7:"Fantastic!", 8:"Awesome!", 9:"Incredible!", 10:"Astonishing!", 16:"You're trying too hard..." },
+
+     overkill_awards: { 4:"amethyst", 7:"emerald", 10:"garnet", 13:"sapphire", 16:"ruby", 19:"crystal" },
+
+     overkill_messages: { 4:"Wasted!", 7:"Demolished!", 10:"Exterminated!", 13:"Pulverized!", 16:"Obliterated!", 19:"Annihilated!" },
+
+     normal_potion_probs: { regenerate:0.4, powerup:0.2, purify:0.1 },
+
+     boss_potion_probs: { regenerate:0.7, powerup:0.5, purify:0.3 }
+	
+    },
+</code>
+
+Here's what each of these objects does:
+
+- *letter_freqs*: all letters do not occur equally often when your grid is refilled (obviously, you'll need more As and Es than Qs and Zs). This array stores the frequencies with which each letter appears. I would not recommend tampering with this, except as a joke.
+- *letter_strengths*: the amount of damage that each letter contributes do a word, based on how common/rare the letters are in English words. If you want, you can replace <code>'Q':3</code> with <code>'Q':1000000</code>, so that using a Q essentially insta-kills any enemy.
+- *gem_awards*: determines the types of gems awarded for words of different lengths.
+- *word_messages*: Lex's silly comments on the quality of the word you've spelled. (This feature isn't actually implemented yet.)
+- *overkill_awards*: determines the types of gems awarded for different amounts of overkill damage. For example, overkilling an enemy by 13, 14, or 15 damage will get you a sapphire.
+- *overkill_messages*: the messages displayed for different amounts of overkill damage. More silly stuff.
+- *normal_potion_probs*: the probability that defeating a regular enemy will award each type of potion. For example, about 1 in 10 regular enemies will award a purify potion when defeated.
+- *boss_potion_probs*: potion-dropping probabilities for boss enemies. Slightly higher than the regular probabilities, because the player should be awarded more for defeating a difficult boss.
 
 ## Adding Mechanics
 
