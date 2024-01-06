@@ -1,0 +1,7 @@
+Just looking at this game again after 4 years of not touching it (and going through a computer science degree). Here are some bad smells that have occurred to me as I look through the codebase:
+
+- Some styling has been delegated to JS code (e.g. setting `style` attributes with JS)
+- Too much functionality stuffed into too few functions
+- Certain things (e.g. the player) really should have a class of their own, rather than just a JSON object
+- Too much JS and CSS in certain HTML files - this should be separated
+- Small, fixed upper bound on the number of levels per world (namely 10) due to a procrustean naming scheme

@@ -1105,25 +1105,3 @@ var Controller = {
 	}
 
 }
-
-//var Controller = {
-//
-//} 
-
-//document.getElementById("btn").addEventListener('click', (ev) => {
-//	txt = document.getElementById("txtfld").value;
-//	alert(weightedRandom(letter_freqs));
-//});
-
-//var clickables = document.getElementsByClassName("tile");
-//for (var i = 0; i < clickables.length; i++) {
-//		clickables[i].addEventListener('click', reply_id);
-//	clickables[i].addEventListener('click', (ev) => {
-//		selected_tiles.push(tiles[reply_id()]);
-//		tiles.splice(reply_id(),1);
-//		refresh_grid();
-//	});
-//}
-
-//fill_tiles(tiles);
-//refresh_grid(tiles);
