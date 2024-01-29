@@ -82,7 +82,8 @@ enemy_library = {
         width: "120px",
         full_hp: 8,
         attacks: [
-            new Attack("Bite",1,2)
+            new Attack("Bite" ,0.8,2)
+	    new Attack( "Itch" ,0.8,0,{ tileplague: 1}) 
         ],
         onapproach: function() {
             Model.player.hp = 1;
