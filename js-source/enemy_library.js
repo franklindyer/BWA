@@ -1,4 +1,4 @@
-enemy_library = {
+let enemy_library = {
 
     t1: {
     

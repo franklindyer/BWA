@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "allowJs": true,
+        "checkJs": false,
         "lib": ["es2015"],
         "module": "commonjs",
         "outDir": "js",

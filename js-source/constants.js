@@ -1,4 +1,4 @@
-game_stats = {
+let game_stats = {
 
     letter_freqs: {
         'A':8.50,
@@ -119,7 +119,7 @@ game_stats = {
  
 }
 
-tile_helptexts = {
+let tile_helptexts = {
     normal: "",
     amethyst: "Amethyst tile: poisons enemy.",
     emerald: "Emerald tile: regenerates 5 hp.",
@@ -132,7 +132,7 @@ tile_helptexts = {
     plague: "Plagued tile: deals no damage and spreads."
 }
 
-tile_colors = {
+let tile_colors = {
     normal: "linear-gradient(to bottom right, #ffd9b3, #ffd9b3)",
     smashed: "linear-gradient(to bottom right, #cccccc, #cccccc)",
     plague: "repeating-linear-gradient(45deg, #ffd9b3, #ffd9b3 7px, #86b300 7px, #86b300 14px)",

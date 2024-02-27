@@ -1,4 +1,4 @@
-treasure_library = {
+let treasure_library = {
 
     t00: {
         name: "Alphabet Blocks",

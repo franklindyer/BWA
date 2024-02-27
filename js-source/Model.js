@@ -29,24 +29,24 @@ class Attack {
     }
 }
 
-deepClone = function(object) {
+let deepClone = function(object) {
     return JSON.parse(JSON.stringify(object));
 }
 
-weightedRandom = function(weights) {
-    let i, sum=0, cumsum=0, r;
-    for (i in weights) {sum += weights[i]}
-    r = sum*Math.random();
-    for (i in weights) {
+let weightedRandom = function(weights) {
+    let sum=0, cumsum=0;
+    for (var i in weights) {sum += weights[i]}
+    let r = sum*Math.random();
+    for (var i in weights) {
         cumsum += weights[i];
         if (r <= cumsum) return String(i);
     }
 }
 
-largestUnder = function(obj, num) {
+let largestUnder = function(obj, num) {
     var current_val = 0;
     var current_num = 0;
-    for (i in obj) {
+    for (var i in obj) {
         if (Number(i) > Number(current_num) && Number(i) <= num) {
             current_num = i;
             current_val = obj[i];
@@ -66,8 +66,8 @@ var Model = {
         selected_tiles: [],
         
         fill_tiles: function(gem="normal") {
-            gem_tile = gem;
-            for (i in this.grid_tiles) {
+            let gem_tile = gem;
+            for (var i in this.grid_tiles) {
                 if (this.grid_tiles[i] == 0) {
                     this.grid_tiles[i] = new Tile(weightedRandom(Model.stats.letter_freqs), gem_tile);
                     gem_tile = "normal";
@@ -77,7 +77,7 @@ var Model = {
         },
 
         purify_tiles: function() {
-            for (i in this.grid_tiles) {
+            for (var i in this.grid_tiles) {
                 if (this.grid_tiles[i] == "stolen") { this.grid_tiles[i]= new Tile(weightedRandom(Model.stats.letter_freqs, "normal")) }
                 if (["smashed","plague"].includes(this.grid_tiles[i].status)) { this.grid_tiles[i].status="normal" }
             }
@@ -89,7 +89,7 @@ var Model = {
         },
         
         deselect_all_tiles: function() {
-            for (i in this.grid_tiles) {
+            for (var i in this.grid_tiles) {
                 if (this.grid_tiles[i] == 0) {
                     this.grid_tiles[i] = this.selected_tiles.pop();
                 }
@@ -236,7 +236,7 @@ var Model = {
     },
     
     word_power: function(word_tiles) {
-            power = 0;
+            let power = 0;
             for (i in word_tiles) {
                 if (!["smashed","plague"].includes(word_tiles[i].status)) { 
                     power += this.stats.letter_strengths[word_tiles[i]['letter']]; 

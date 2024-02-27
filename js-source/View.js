@@ -162,8 +162,8 @@ var View = {
             tile_tds[i].style.backgroundImage = "";
             tile_tds[i].style.animation = "";
         }
-        for (i in grid_tiles) {
-            current_tile = tile_tds[i];
+        for (var i in grid_tiles) {
+            let current_tile = tile_tds[i];
             if (grid_tiles[i] != 0 && grid_tiles[i] != "stolen") {
                 var type = grid_tiles[i].status;
                 current_tile.style.backgroundImage = tile_style[type];
@@ -181,7 +181,7 @@ var View = {
         }
         sel_tile_table.innerHTML = "";
         for (var i in selected_tiles) {
-            newtile = document.createElement("td");
+            let newtile = document.createElement("td");
             newtile.classList.add("grid_selected");
             newtile.innerHTML = selected_tiles[i].letter;
             var type = selected_tiles[i].status;

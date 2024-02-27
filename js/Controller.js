@@ -2,7 +2,7 @@
 var Controller = {
     respond_to_tile_click: function () {
         if (this.innerHTML != "" && Model.whoseturn == "player") {
-            tile_id = event.srcElement.id.substring(4);
+            let tile_id = event.srcElement.id.substring(4);
             View.display_helptext(View.tile_helptexts[Model.tiles.grid_tiles[Number(tile_id)].status]);
             Model.tiles.select_tile(tile_id);
             View.refresh_grid(Model.tiles.grid_tiles, Model.tiles.selected_tiles);
@@ -15,7 +15,7 @@ var Controller = {
     },
     respond_to_word_submit: function () {
         if (Model.whoseturn == "player") {
-            word = "";
+            let word = "";
             for (var i in Model.tiles.selected_tiles) {
                 word += Model.tiles.selected_tiles[i].letter;
             }
@@ -98,7 +98,7 @@ var Controller = {
     checkword: function (word) {
         const xhr = new XMLHttpRequest(), method = "GET", url = "/checkword/" + word;
         xhr.open(method, url, true);
-        _this = this;
+        let _this = this;
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 var status = xhr.status;
@@ -225,16 +225,16 @@ var Controller = {
     },
     enemy_attack_sequence: function () {
         if (Model.enemy.special.freeze == 0) {
-            attacks = Model.enemy.attacks;
-            attack_weights = [];
+            let attacks = Model.enemy.attacks;
+            let attack_weights = [];
             for (var i in attacks) {
                 attack_weights.push(attacks[i].probability);
             }
-            attack_num = weightedRandom(attack_weights);
-            chosen_attack = attacks[attack_num];
+            let attack_num = weightedRandom(attack_weights);
+            let chosen_attack = attacks[attack_num];
             View.select_attack(attack_num);
             setTimeout(() => { View.deselect_attack(attack_num); }, 3000);
-            old_player_hp = Model.player.hp;
+            let old_player_hp = Model.player.hp;
             if (Model.player.special.shielded == 0) {
                 if (Model.enemy.special.powerup != 0 && Model.enemy.special.powerdown == 0) {
                     Model.player.smart_health_decrement(1.5 * chosen_attack.damage);
@@ -259,7 +259,7 @@ var Controller = {
         var p_old_health = Model.player.hp;
         var e_old_health = Model.enemy.hp;
         // tileplague spread
-        num_plagued = 0;
+        let num_plagued = 0;
         for (var i in Model.tiles.grid_tiles) {
             if (Model.tiles.grid_tiles[i].status == "plague") {
                 num_plagued++;
@@ -348,7 +348,7 @@ var Controller = {
             Model.player.potions.powerup += 3;
             Model.player.potions.purify += 2;
         }
-        next_enemy_id = Model.enemy.next_enemy_id;
+        let next_enemy_id = Model.enemy.next_enemy_id;
         Model.enemy.updateme(enemy_library[next_enemy_id]);
         Model.enemy.reset_enemy_effects();
         this.pack_savefile();
@@ -417,7 +417,7 @@ var Controller = {
         }
     },
     pack_savefile: function () {
-        sf_updates = {
+        let sf_updates = {
             grid_tiles: Model.tiles.grid_tiles,
             potions: Model.player.potions,
             hp: Model.player.full_hp,
