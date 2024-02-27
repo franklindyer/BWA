@@ -1,0 +1,15 @@
+{
+  "name": "bwa",
+  "version": "1.0.0",
+  "description": "Bookworm Adventures is a word-forming combat-based RPG videogame, created originally by PopCap games. During my childhood, I spent a lot of time playing Bookworm Adventures, obsessing over its quirky characters, and wishing I could add my own characters, levels, and mechanics to the game. Unfortunately, BWA was never a *very* popular game. It eventually fell out of support, and there never was a version of the game playable on Mac or iOS. The only way I've been able to play BWA in the past few years has been through a glitchy, ad-ridden online version that didn't save progress. Yuck.",
+  "main": "initialize.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Franklin Pezzuti Dyer",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.11.20",
+    "typescript": "^5.3.3"
+  }
+}

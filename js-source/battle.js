@@ -1,10 +1,10 @@
-"use strict";
 class Tile {
-    constructor(letter, status = "normal") {
+    constructor(letter, status="normal") {
         this.letter = letter;
         this.status = status;
     }
 }
+
 class Attack {
     constructor(name, prob, damage, effect_obj) {
         this.name = name;
@@ -22,28 +22,28 @@ class Attack {
             bleed: 0,
             burn: 0,
             stun: 0
-        };
+        }
         for (var i in effect_obj) {
             this.effects[i] = effect_obj[i];
         }
     }
 }
-deepClone = function (object) {
+
+deepClone = function(object) {
     return JSON.parse(JSON.stringify(object));
-};
-weightedRandom = function (weights) {
-    let i, sum = 0, cumsum = 0, r;
-    for (i in weights) {
-        sum += weights[i];
-    }
-    r = sum * Math.random();
+}
+
+weightedRandom = function(weights) {
+    let i, sum=0, cumsum=0, r;
+    for (i in weights) {sum += weights[i]}
+    r = sum*Math.random();
     for (i in weights) {
         cumsum += weights[i];
-        if (r <= cumsum)
-            return String(i);
+        if (r <= cumsum) return String(i);
     }
-};
-largestUnder = function (obj, num) {
+}
+
+largestUnder = function(obj, num) {
     var current_val = 0;
     var current_num = 0;
     for (i in obj) {
@@ -53,13 +53,19 @@ largestUnder = function (obj, num) {
         }
     }
     return current_val;
-};
+}
+
 var Model = {
+
     stats: game_stats,
+    
     tiles: {
+    
         grid_tiles: new Array(16).fill(0),
+        
         selected_tiles: [],
-        fill_tiles: function (gem = "normal") {
+        
+        fill_tiles: function(gem="normal") {
             gem_tile = gem;
             for (i in this.grid_tiles) {
                 if (this.grid_tiles[i] == 0) {
@@ -69,32 +75,31 @@ var Model = {
             }
             return this.grid_tiles;
         },
-        purify_tiles: function () {
+
+        purify_tiles: function() {
             for (i in this.grid_tiles) {
-                if (this.grid_tiles[i] == "stolen") {
-                    this.grid_tiles[i] = new Tile(weightedRandom(Model.stats.letter_freqs, "normal"));
-                }
-                if (["smashed", "plague"].includes(this.grid_tiles[i].status)) {
-                    this.grid_tiles[i].status = "normal";
-                }
+                if (this.grid_tiles[i] == "stolen") { this.grid_tiles[i]= new Tile(weightedRandom(Model.stats.letter_freqs, "normal")) }
+                if (["smashed","plague"].includes(this.grid_tiles[i].status)) { this.grid_tiles[i].status="normal" }
             }
         },
-        select_tile: function (index) {
+        
+        select_tile: function(index) {
             this.selected_tiles.push(this.grid_tiles[index]);
             this.grid_tiles[index] = 0;
         },
-        deselect_all_tiles: function () {
+        
+        deselect_all_tiles: function() {
             for (i in this.grid_tiles) {
                 if (this.grid_tiles[i] == 0) {
                     this.grid_tiles[i] = this.selected_tiles.pop();
                 }
             }
         },
-        afflict_tile: function (affliction, force = 0) {
-            if (affliction == "tilesteal") {
-                this.grid_tiles[Math.floor(Math.random() * this.grid_tiles.length)] = "stolen";
-            }
-            else {
+        
+        afflict_tile: function(affliction, force=0) {
+            if (affliction=="tilesteal") {
+                this.grid_tiles[Math.floor(Math.random()*this.grid_tiles.length)]="stolen";
+            } else {
                 var which_tile = Math.floor(Math.random() * this.grid_tiles.length);
                 var rand_tile = this.grid_tiles[which_tile];
                 if (rand_tile.status == "normal" || force != 0) {
@@ -103,28 +108,36 @@ var Model = {
                 }
             }
         },
-        alter_tile: function () {
-            bad_tiles = ["J", "Q", "X", "Z"];
+        
+        alter_tile: function() {
+            bad_tiles = ["J","Q","X","Z"];
             var which_tile = Math.floor(Math.random() * this.grid_tiles.length);
             var rand_tile = this.grid_tiles[which_tile];
             if (rand_tile.letter) {
                 var new_letter = bad_tiles[Math.floor(Math.random() * 4)];
                 rand_tile.letter = new_letter;
-                return which_tile;
+                return which_tile
             }
         },
-        scramble_tiles: function () {
+        
+        scramble_tiles: function() {
             for (var i in this.grid_tiles) {
                 this.grid_tiles[i].letter = weightedRandom(Model.stats.letter_freqs);
             }
             return this.grid_tiles;
         }
+        
     },
+    
     whoseturn: "player",
+    
     player: {
+    
         name: "Lex",
+    
         full_hp: 15,
         hp: 15,
+        
         special: {
             poison: 0,
             bleed: 0,
@@ -134,47 +147,58 @@ var Model = {
             stun: 0,
             shielded: 0
         },
+
         potions: {
             regenerate: 0,
             powerup: 0,
             purify: 0
         },
+
         treasures: [],
+
         hardcore: 0,
-        smart_health_decrement: function (damage) {
+        
+        smart_health_decrement: function(damage) {
             if (this.hp > damage) {
                 this.hp += -damage;
-            }
-            else {
+            } else {
                 this.hp = 0;
             }
         },
-        get_random_potion: function (potion_probs) {
+
+        get_random_potion: function(potion_probs) {
             for (var i in potion_probs) {
-                if (Math.random() < potion_probs[i]) {
-                    this.potions[i] += 1;
-                }
-            }
+                if (Math.random()<potion_probs[i]) { this.potions[i] += 1 }
+            } 
         },
-        reset_player_effects: function () {
-            for (var i in this.special) {
-                this.special[i] = 0;
-            }
+
+        reset_player_effects: function() {
+            for (var i in this.special) { this.special[i] = 0; }
         },
-        purify_player_effects: function () {
+
+        purify_player_effects: function() {
             var sp = this.special;
             sp.poison = sp.bleed = sp.burn = sp.powerdown = sp.stun = 0;
         }
+        
     },
+    
     enemy: {
+    
         name: "",
+        
         id: "",
+    
         full_hp: 0,
         hp: 0,
+
         overkill: 0,
+        
         attacks: [],
+        
         flavortext: "",
-        special: {
+        
+        special: {        
             poison: 0,
             bleed: 0,
             burn: 0,
@@ -182,106 +206,89 @@ var Model = {
             powerdown: 0,
             freeze: 0
         },
-        smart_health_decrement: function (damage) {
+        
+        smart_health_decrement: function(damage) {
             if (this.hp > damage) {
                 this.hp += -damage;
-            }
-            else {
+            } else {
                 this.overkill = damage - this.hp;
                 this.hp = 0;
             }
         },
-        reset_enemy_effects: function () {
-            for (var i in this.special) {
-                this.special[i] = 0;
-            }
+
+        reset_enemy_effects: function() {
+            for (var i in this.special) { this.special[i] = 0; }
             this.overkill = 0;
         },
-        updateme: function (new_enemy) {
+
+        updateme: function(new_enemy) {
             delete this.ondeath;
-            for (var i in new_enemy) {
-                this[i] = new_enemy[i];
-            }
+            for (var i in new_enemy) { this[i] = new_enemy[i] }
         }
+    
     },
-    decrement_effects: function () {
+    
+    decrement_effects: function() {
         var p_spesh = this.player.special;
         var e_spesh = this.enemy.special;
-        for (var i in p_spesh) {
-            if (p_spesh[i] != 0) {
-                this.player.special[i] += -1;
-            }
-        }
-        for (var i in e_spesh) {
-            if (e_spesh[i] != 0) {
-                this.enemy.special[i] += -1;
-            }
-        }
+        for (var i in p_spesh) { if (p_spesh[i] != 0) { this.player.special[i] += -1 } }
+        for (var i in e_spesh) { if (e_spesh[i] != 0) { this.enemy.special[i] += -1 } }
     },
-    word_power: function (word_tiles) {
-        power = 0;
-        for (i in word_tiles) {
-            if (!["smashed", "plague"].includes(word_tiles[i].status)) {
-                power += this.stats.letter_strengths[word_tiles[i]['letter']];
-            }
-            if (word_tiles[i].status != "normal") {
-                if (word_tiles[i].status == "amethyst") {
-                    this.enemy.special.poison += 2;
-                    power += 1;
+    
+    word_power: function(word_tiles) {
+            power = 0;
+            for (i in word_tiles) {
+                if (!["smashed","plague"].includes(word_tiles[i].status)) { 
+                    power += this.stats.letter_strengths[word_tiles[i]['letter']]; 
                 }
-                else if (word_tiles[i].status == "emerald") {
-                    if (this.player.full_hp - this.player.hp > 5) {
-                        this.player.hp += 5;
-                    }
-                    else {
+                if (word_tiles[i].status != "normal") {
+                    if (word_tiles[i].status == "amethyst") {
+                        this.enemy.special.poison += 2;
+                        power += 1;
+                    } else if (word_tiles[i].status == "emerald") {
+                        if (this.player.full_hp - this.player.hp > 5) { this.player.hp += 5 } else { this.player.hp = this.player.full_hp }
+                        power += 1;
+                    } else if (word_tiles[i].status == "garnet") {
+                        this.enemy.special.powerdown += 1;
+                        this.enemy.special.powerup = 0;
+                        power += 2;
+                    } else if (word_tiles[i].status == "sapphire") {
+                        this.enemy.special.freeze += 1;
+                        power += 2;
+                    } else if (word_tiles[i].status == "ruby") {
+                        this.enemy.special.burn += 3;
+                        power += 3;
+                    } else if (word_tiles[i].status == "crystal") {
+                        this.player.purify_player_effects();
+                        this.player.special.shielded += 1;
+                        this.tiles.purify_tiles();
+                        power += 4;
+                    } else if (word_tiles[i].status == "diamond") {
                         this.player.hp = this.player.full_hp;
+                        for (var i in this.player.potions) { this.player.potions[i]++; }
+                        power += 5;
                     }
-                    power += 1;
-                }
-                else if (word_tiles[i].status == "garnet") {
-                    this.enemy.special.powerdown += 1;
-                    this.enemy.special.powerup = 0;
-                    power += 2;
-                }
-                else if (word_tiles[i].status == "sapphire") {
-                    this.enemy.special.freeze += 1;
-                    power += 2;
-                }
-                else if (word_tiles[i].status == "ruby") {
-                    this.enemy.special.burn += 3;
-                    power += 3;
-                }
-                else if (word_tiles[i].status == "crystal") {
-                    this.player.purify_player_effects();
-                    this.player.special.shielded += 1;
-                    this.tiles.purify_tiles();
-                    power += 4;
-                }
-                else if (word_tiles[i].status == "diamond") {
-                    this.player.hp = this.player.full_hp;
-                    for (var i in this.player.potions) {
-                        this.player.potions[i]++;
-                    }
-                    power += 5;
                 }
             }
-        }
-        return power;
+            return power;
     },
-    initialize: function () {
+    
+    initialize: function() {
         this.tiles.fill_tiles();
-        if (this.player.hardcore == 0) {
-            this.player.hp = this.player.full_hp;
-        }
-        ;
+        if (this.player.hardcore == 0) { this.player.hp = this.player.full_hp };
         this.enemy.hp = this.enemy.full_hp;
-        this.whoseturn = "player";
+        this.whoseturn = "player"; 
     }
-};
+    
+}
+
 var View = {
+
     message_queue: [],
+
     dialogue_clickable: 0,
-    display_message: function (dialogue_obj) {
+
+    display_message: function(dialogue_obj) {
         this.dialogue_clickable = 0;
         var blackout = document.getElementById("blackout");
         var messageboard = document.getElementById("messageboard");
@@ -290,68 +297,63 @@ var View = {
         var speaker_img = document.getElementById("current_speaker");
         speaker_img.style.display = "none";
         blackout.style.display = "inline-block";
-        if (dialogue_obj.color) {
-            messageboard.style.backgroundColor = dialogue_obj.color;
-        }
-        else {
-            messageboard.style.backgroundColor = "white";
-        }
-        if (dialogue_obj.float) {
-            speaker_img.style.float = dialogue_obj.float;
-        }
-        if (dialogue_obj.speaker_img) {
-            speaker_img.style.display = "block";
-            speaker_img.src = dialogue_obj.speaker_img;
-        }
+        if (dialogue_obj.color) { messageboard.style.backgroundColor = dialogue_obj.color; } else { messageboard.style.backgroundColor = "white"; }
+        if (dialogue_obj.float) { speaker_img.style.float = dialogue_obj.float; }
+        if (dialogue_obj.speaker_img) { speaker_img.style.display = "block"; speaker_img.src = dialogue_obj.speaker_img; }
         for (var i = 0; i < dialogue_obj.message.length; i++) {
-            setTimeout(function (i) {
-                message.innerHTML = dialogue_obj.message.substring(0, i + 1);
-            }.bind(this, i), 20 * i);
+            setTimeout(function(i) {
+                message.innerHTML = dialogue_obj.message.substring(0, i+1);
+            }.bind(this,i),20*i);
         }
-        setTimeout(() => { this.dialogue_clickable = 1; }, 20 * dialogue_obj.message.length);
+        setTimeout(() => { this.dialogue_clickable = 1; }, 20*dialogue_obj.message.length);
     },
-    initialize_dialogue: function () {
-        if (this.message_queue.length != 0) {
-            this.display_message(this.message_queue.shift());
-        }
+
+    initialize_dialogue: function() {
+        if (this.message_queue.length != 0) { this.display_message(this.message_queue.shift()); }
     },
-    make_dialogue_functional: function () {
+
+    make_dialogue_functional: function() {
         document.getElementById("messageboard").addEventListener('click', () => {
             if (this.dialogue_clickable) {
                 if (this.message_queue == 0) {
                     document.getElementById("blackout").style.display = "none";
-                }
-                else {
+                } else {
                     this.display_message(this.message_queue.shift());
                 }
             }
         });
     },
-    display_helptext: function (helptext) {
+
+    display_helptext: function(helptext) {
         var help_div = document.getElementById("help_text");
         help_div.innerHTML = helptext;
     },
+
     tile_helptexts: tile_helptexts,
-    set_name_tags: function (pname, ename) {
+
+    set_name_tags: function(pname, ename) {
         var player_tag = document.getElementById("player_name");
         var enemy_tag = document.getElementById("enemy_name");
         player_tag.innerHTML = pname;
         enemy_tag.innerHTML = ename;
     },
-    set_enemy_image: function (enemy) {
+    
+    set_enemy_image: function(enemy) {
         var enemy_img = document.getElementById("enemy_img");
         var enemy_display = document.getElementById("enemy_display");
-        enemy_img.src = "/img/enemy_" + enemy.id + ".png";
+        enemy_img.src = "/img/enemy_"+enemy.id+".png";
         enemy_display.style.height = enemy.height;
         enemy_img.style.width = enemy.width;
         enemy_img.style.display = "block";
     },
-    set_background_image: function (enemy) {
+    
+    set_background_image: function(enemy) {
         var battlefield = document.getElementById("battlefield");
-        var img_url = "url(/img/background_" + String(enemy.id).substring(1, enemy.id.length - 1) + ".png)";
+        var img_url = "url(/img/background_"+String(enemy.id).substring(1, enemy.id.length-1)+".png)";
         battlefield.style.backgroundImage = img_url;
     },
-    display_enemy_quips: function (enemy) {
+    
+    display_enemy_quips: function(enemy) {
         if (enemy.quips) {
             var quip_interval_id = setInterval(() => {
                 var random_quip = enemy.quips[Math.floor(Math.random() * enemy.quips.length)];
@@ -360,12 +362,13 @@ var View = {
                 speechbubble.style.display = "inline-block";
                 setTimeout(() => {
                     speechbubble.style.display = "none";
-                }, 20000);
-            }, 80000);
+                },20000)
+            }, 80000)
             return quip_interval_id;
         }
     },
-    display_overkill_msg: function (message, gemtype) {
+
+    display_overkill_msg: function(message, gemtype) {
         var message_box = document.getElementById("overkill_box");
         var prize_preview = document.getElementById("overkill_prize");
         var overkill_message = document.getElementById("overkill_msg");
@@ -373,22 +376,22 @@ var View = {
         overkill_message.innerHTML = message;
         message_box.style.animation = "fadein 0.3s";
         message_box.style.display = "block";
-        setTimeout(() => { message_box.style.animation = "fadeout 0.3s"; }, 2400);
-        setTimeout(() => { message_box.style.display = "none"; }, 2700);
+        setTimeout(() => { message_box.style.animation = "fadeout 0.3s"; }, 2400)
+        setTimeout(() => { message_box.style.display = "none"; }, 2700)
     },
-    render_potions: function (player) {
+
+    render_potions: function(player) {
         var needs_new_event_listener = {};
         for (var i in player.potions) {
-            var preex_potion_count = document.getElementById(String(i) + "_potion_count");
+            var preex_potion_count = document.getElementById(String(i)+"_potion_count");
             needs_new_event_listener[i] = false;
             if (preex_potion_count && player.potions[i] != 0) {
                 preex_potion_count.innerHTML = String(player.potions[i]);
-            }
-            else {
-                var potion_section = document.getElementById(String(i) + "_potions");
+            } else {
+                var potion_section = document.getElementById(String(i)+"_potions");
                 potion_section.innerHTML = "";
                 if (player.potions[i] != 0) {
-                    var img_url = "/img/" + String(i) + "_potion.png";
+                    var img_url = "/img/"+String(i)+"_potion.png";
                     var potion_img = document.createElement("img");
                     var potion_count = document.createElement("t1");
                     potion_img.src = img_url;
@@ -397,41 +400,45 @@ var View = {
                     potion_section.appendChild(potion_count);
                     potion_section.appendChild(potion_img);
                     potion_img.style.width = "100%";
-                    potion_img.id = String(i) + "_potion_clicker";
+                    potion_img.id = String(i)+"_potion_clicker";
                     needs_new_event_listener[i] = true;
                 }
             }
         }
         return needs_new_event_listener;
     },
-    render_treasures: function (player) {
+
+    render_treasures: function(player) {
         for (var i in player.treasures) {
-            var treasure_section = document.getElementById("treasure" + String(Number(i) + 1));
+            var treasure_section = document.getElementById("treasure"+String(Number(i)+1));
             treasure_section.innerHTML = "";
-            var img_url = "/img/treasure_" + String(player.treasures[i].id) + ".png";
+            var img_url = "/img/treasure_"+String(player.treasures[i].id)+".png";
             var treasure_img = document.createElement("img");
             var treasure_name = document.createElement("t1");
             var treasure_desc = document.createElement("p");
             treasure_img.src = img_url;
             treasure_name.innerHTML = player.treasures[i].name;
-            //    treasure_desc.innerHTML = player.treasures[i].description;
-            //    treasure_desc.style.fontSize = "8px";
-            //    treasure_desc.style.lineHeight = "8px";
+        //    treasure_desc.innerHTML = player.treasures[i].description;
+        //    treasure_desc.style.fontSize = "8px";
+        //    treasure_desc.style.lineHeight = "8px";
             treasure_section.appendChild(treasure_img);
             treasure_section.appendChild(treasure_name);
-            //    treasure_section.appendChild(treasure_desc);
+        //    treasure_section.appendChild(treasure_desc);
             treasure_img.style.width = "85%";
         }
     },
-    highlight_treasure: function (whichtreasure) {
-        var treasure_box = document.getElementById("treasure" + String(whichtreasure));
+
+    highlight_treasure: function(whichtreasure) {
+        var treasure_box = document.getElementById("treasure"+String(whichtreasure));
         treasure_box.style.borderColor = "#ff9900";
         setTimeout(() => { treasure_box.style.borderColor = "#804000"; }, 2000);
     },
+    
     tile_colors: tile_colors,
-    refresh_grid: function (grid_tiles, selected_tiles) {
+
+    refresh_grid: function(grid_tiles, selected_tiles) {
         var tile_style = this.tile_colors;
-        // tiles still in grid (not selected)
+// tiles still in grid (not selected)
         var tile_tds = document.getElementsByClassName("grid");
         for (var i = 0; i < tile_tds.length; i++) {
             tile_tds[i].innerHTML = "";
@@ -445,21 +452,16 @@ var View = {
                 var type = grid_tiles[i].status;
                 current_tile.style.backgroundImage = tile_style[type];
                 tile_tds[i].innerHTML = grid_tiles[i].letter;
-                if (grid_tiles[i].one_time_animation) {
-                    current_tile.style.animation = grid_tiles[i].one_time_animation;
-                    grid_tiles[i].one_time_animation = "";
-                }
-                if (["amethyst", "emerald", "garnet", "sapphire", "ruby", "crystal", "diamond"].includes(type)) {
-                    current_tile.style.animation = "glimmer 2s infinite";
-                }
+                if (grid_tiles[i].one_time_animation) { current_tile.style.animation = grid_tiles[i].one_time_animation; grid_tiles[i].one_time_animation = ""; }
+                if (["amethyst","emerald","garnet","sapphire","ruby","crystal","diamond"].includes(type)) { current_tile.style.animation = "glimmer 2s infinite"; }
             }
         }
-        // selected tiles
+// selected tiles
         var sel_tile_table = document.getElementById("selected_tiles");
         if (selected_tiles) {
             var num_sel = selected_tiles.length;
-            var sel_size = 50 - 5 * Math.floor(num_sel / 3);
-            sel_tile_table.style.height = String(sel_size) + "px";
+            var sel_size = 50 - 5 * Math.floor(num_sel/3);
+            sel_tile_table.style.height = String(sel_size)+"px";
         }
         sel_tile_table.innerHTML = "";
         for (var i in selected_tiles) {
@@ -468,18 +470,18 @@ var View = {
             newtile.innerHTML = selected_tiles[i].letter;
             var type = selected_tiles[i].status;
             newtile.style.backgroundImage = tile_style[type];
-            if (["amethyst", "emerald", "garnet", "sapphire", "ruby", "crystal", "diamond"].includes(type)) {
-                newtile.style.animation = "glimmer 2s infinite";
-            }
+            if (["amethyst","emerald","garnet","sapphire","ruby","crystal","diamond"].includes(type)) { newtile.style.animation = "glimmer 2s infinite"; }
             if (selected_tiles) {
-                newtile.style.width = String(sel_size) + "px";
-                newtile.style.height = String(sel_size) + "px";
+                newtile.style.width = String(sel_size)+"px";
+                newtile.style.height = String(sel_size)+"px";
             }
+
             sel_tile_table.appendChild(newtile);
         }
     },
-    tile_animation: function (whichtile, animation, grid) {
-        var tile = document.getElementById("grid" + String(whichtile));
+
+    tile_animation: function(whichtile, animation, grid) {
+        var tile = document.getElementById("grid"+String(whichtile));
         if (tile) {
             tile.style.animation = animation;
             if (grid) {
@@ -487,107 +489,110 @@ var View = {
             }
         }
     },
-    refresh_enemy_health: function (enemy, old_health) {
+    
+    refresh_enemy_health: function(enemy, old_health) {
         var enemy_bar = document.getElementById("enemy_health");
-        var old_width = 20 + 180 * old_health / enemy.full_hp;
-        var new_width = 20 + 180 * enemy.hp / enemy.full_hp;
+        var old_width = 20 + 180*old_health/enemy.full_hp;
+        var new_width = 20 + 180*enemy.hp/enemy.full_hp;
         function set_old() {
-            enemy_bar.setAttribute("style", "width:" + String(old_width) + "px");
+            enemy_bar.setAttribute("style","width:"+String(old_width)+"px")
         }
         function set_new() {
-            enemy_bar.setAttribute("style", "width:" + String(new_width) + "px");
+            enemy_bar.setAttribute("style","width:"+String(new_width)+"px")
         }
         for (var i = 0; i < 5; i++) {
-            setTimeout(set_old, 300 * i);
-            setTimeout(set_new, 300 * i + 150);
+            setTimeout(set_old, 300*i);
+            setTimeout(set_new, 300*i+150);
         }
-        //        enemy_bar.setAttribute("style","width:"+String(new_width)+"px");
+//        enemy_bar.setAttribute("style","width:"+String(new_width)+"px");
         enemy_bar.innerHTML = Math.ceil(enemy.hp);
     },
-    refresh_player_health: function (player, old_health) {
+    
+    refresh_player_health: function(player, old_health) {
         var player_bar = document.getElementById("player_health");
-        var old_width = 20 + 180 * old_health / player.full_hp;
-        var new_width = 20 + 180 * player.hp / player.full_hp;
+        var old_width = 20 + 180*old_health/player.full_hp;
+        var new_width = 20 + 180*player.hp/player.full_hp;
         function set_old() {
-            player_bar.setAttribute("style", "width:" + String(old_width) + "px");
+            player_bar.setAttribute("style","width:"+String(old_width)+"px")
         }
-        function set_new() {
-            player_bar.setAttribute("style", "width:" + String(new_width) + "px");
+        function set_new () {
+            player_bar.setAttribute("style","width:"+String(new_width)+"px")
         }
         for (var i = 0; i < 5; i++) {
-            setTimeout(set_old, 300 * i);
-            setTimeout(set_new, 300 * i + 150);
+            setTimeout(set_old, 300*i);
+            setTimeout(set_new, 300*i+150);
         }
         player_bar.innerHTML = Math.ceil(player.hp);
         var player_img = document.getElementById("player_img");
         if (player.hp <= 3 && player.hardcore == 0) {
             player_img.src = "/img/lex_lowhealth.png";
             player_img.style["animation"] = player_img.style["-webkit-animation"] = player_img.style["-o-animation"] = "playerbreathe 1.0s infinite";
-        }
-        else if (player.hardcore == 0) {
+        } else if (player.hardcore == 0) {
             player_img.src = "/img/lex.png";
             player_img.style["animation"] = player_img.style["-webkit-animation"] = player_img.style["-o-animation"] = "playerbreathe 1.7s infinite";
         }
     },
-    refresh_player_effects: function (player) {
+    
+    refresh_player_effects: function(player) {
         var player_effects = document.getElementById("player_effects");
         player_effects.innerHTML = "";
         for (var i in player.special) {
             if (player.special[i] != 0) {
-                var chunk = document.createElement("td");
+                var chunk = document.createElement("td")
                 var icon = document.createElement("img");
-                icon.src = "/img/" + String(i) + "_icon.png";
+                icon.src = "/img/"+String(i)+"_icon.png";
                 icon.classList.add("attackicon");
                 var coeff = document.createElement("a");
-                coeff.innerHTML = String(player.special[i]);
+                coeff.innerHTML=String(player.special[i]);
                 chunk.appendChild(icon);
                 chunk.appendChild(coeff);
                 player_effects.appendChild(chunk);
             }
         }
     },
-    enemy_fade: function () {
+
+    enemy_fade: function() {
         enemy_img = document.getElementById("enemy_img");
         enemy_img.style.animation = "fadeout 2s";
-        setTimeout(() => { enemy_img.style.display = "none"; enemy_img.style.animation = ""; }, 2000);
+        setTimeout(() => { enemy_img.style.display = "none"; enemy_img.style.animation = ""; },2000)
     },
-    refresh_enemy_effects: function (enemy) {
+    
+    refresh_enemy_effects: function(enemy) {
         var enemy_effects = document.getElementById("enemy_effects");
         enemy_effects.innerHTML = "";
         for (var i in enemy.special) {
             if (enemy.special[i] != 0) {
-                var chunk = document.createElement("td");
+                var chunk = document.createElement("td")
                 var icon = document.createElement("img");
-                icon.src = "/img/" + String(i) + "_icon.png";
+                icon.src = "/img/"+String(i)+"_icon.png";
                 icon.classList.add("attackicon");
                 var coeff = document.createElement("a");
-                coeff.innerHTML = String(enemy.special[i]);
+                coeff.innerHTML=String(enemy.special[i]);
                 chunk.appendChild(icon);
                 chunk.appendChild(coeff);
                 enemy_effects.appendChild(chunk);
             }
         }
     },
-    show_grid_blocker: function (color, text) {
+    
+    show_grid_blocker: function(color, text) {
         var grid_blocker = document.getElementById("block_grid");
         if (color) {
             grid_blocker.style.display = "block";
             grid_blocker.style.backgroundColor = color;
-        }
-        else {
+        } else {
             grid_blocker.style.display = "none";
         }
-        if (text) {
-            document.getElementById("block_grid_text").innerHTML = text;
-        }
+        if (text) { document.getElementById("block_grid_text").innerHTML = text; }
     },
-    render_enemy_info: function (enemy) {
+
+    render_enemy_info: function(enemy) {
         document.getElementById("enemy_info").innerHTML = "";
         for (var i in enemy.attacks) {
             var row = document.createElement("tr");
             var entry = document.createElement("td");
-            entry.classList.add("attacktext");
-            entry.id = "attack" + String(i);
+            entry.classList.add("attacktext")
+            entry.id = "attack"+String(i);
             var node = document.createTextNode(enemy.attacks[i].name);
             entry.appendChild(node);
             row.appendChild(entry);
@@ -595,8 +600,8 @@ var View = {
             for (var j in enemy.attacks[i].effects) {
                 if (enemy.attacks[i].effects[j] != 0) {
                     var icon = document.createElement("img");
-                    icon.src = "/img/" + String(j) + "_icon.png";
-                    icon.classList.add("attackicon");
+                    icon.src = "/img/"+String(j)+"_icon.png";
+                    icon.classList.add("attackicon")
                     entry.appendChild(icon);
                     show_sword = 0;
                 }
@@ -604,10 +609,10 @@ var View = {
             if (enemy.attacks[i].damage != 0 && show_sword == 1) {
                 var icon = document.createElement("img");
                 icon.src = "/img/damage_icon.png";
-                icon.classList.add("attackicon");
+                icon.classList.add("attackicon")
                 entry.appendChild(icon);
             }
-            document.getElementById("enemy_info").appendChild(row);
+            document.getElementById("enemy_info").appendChild(row)
         }
         var row = document.createElement("tr");
         var entry = document.createElement("td");
@@ -617,44 +622,52 @@ var View = {
         row.appendChild(entry);
         document.getElementById("enemy_info").appendChild(row);
     },
-    select_attack: function (attack_num) {
-        var attack_info = document.getElementById("attack" + String(attack_num));
+    
+    select_attack: function(attack_num) {
+        var attack_info = document.getElementById("attack"+String(attack_num));
         attack_info.style.borderColor = "#ff8080";
     },
-    deselect_attack: function (attack_num) {
-        var attack_info = document.getElementById("attack" + String(attack_num));
+    
+    deselect_attack: function(attack_num) {
+        var attack_info = document.getElementById("attack"+String(attack_num));
         attack_info.style.borderColor = "#e60000";
     }
-};
+
+}
+
 var Savefile = {
-    retrieve_savefile: function () {
+
+    retrieve_savefile: function() {
         this.complete_savefile = JSON.parse(localStorage.getItem("savefile"));
         this.this_savefile = deepClone(this.complete_savefile.games[this.complete_savefile.current_game]);
     },
-    save_changes: function () {
+
+    save_changes: function() {
         this.complete_savefile.games[this.complete_savefile.current_game] = deepClone(this.this_savefile);
-        localStorage.setItem("savefile", JSON.stringify(this.complete_savefile));
+        localStorage.setItem("savefile",JSON.stringify(this.complete_savefile));
     },
-    set_death_checkpoint: function () {
+
+    set_death_checkpoint: function() {
         for (var i in this.this_savefile) {
-            if (i != "death_checkpoint") {
-                this.this_savefile.death_checkpoint[i] = deepClone(this.this_savefile)[i];
-            }
+            if (i != "death_checkpoint") { this.this_savefile.death_checkpoint[i] = deepClone(this.this_savefile)[i]; }
         }
     },
-    death_overwrite: function () {
+
+    death_overwrite: function() {
         for (var i in this.this_savefile.death_checkpoint) {
             this.this_savefile[i] = this.this_savefile.death_checkpoint[i];
         }
     },
-    change_this_savefile: function (updates) {
-        for (var i in updates) {
-            this.this_savefile[i] = deepClone(updates)[i];
-        }
+
+    change_this_savefile: function(updates) {
+        for (var i in updates) { this.this_savefile[i] = deepClone(updates)[i]; }
     },
-};
+
+}
+
 var Controller = {
-    respond_to_tile_click: function () {
+
+    respond_to_tile_click: function() {
         if (this.innerHTML != "" && Model.whoseturn == "player") {
             tile_id = event.srcElement.id.substring(4);
             View.display_helptext(View.tile_helptexts[Model.tiles.grid_tiles[Number(tile_id)].status]);
@@ -662,24 +675,25 @@ var Controller = {
             View.refresh_grid(Model.tiles.grid_tiles, Model.tiles.selected_tiles);
         }
     },
-    respond_to_deselect: function () {
+    
+    respond_to_deselect: function() {
         Model.tiles.deselect_all_tiles();
         View.refresh_grid(Model.tiles.grid_tiles, Model.tiles.selected_tiles);
         View.display_helptext("");
     },
-    respond_to_word_submit: function () {
+    
+    respond_to_word_submit: function() {
         if (Model.whoseturn == "player") {
             word = "";
             for (var i in Model.tiles.selected_tiles) {
                 word += Model.tiles.selected_tiles[i].letter;
             }
-            if (word.length > 2) {
-                Controller.checkword(word);
-            }
+            if (word.length > 2) { Controller.checkword(word); }
         }
         View.display_helptext("");
     },
-    respond_to_scramble: function () {
+    
+    respond_to_scramble: function() {
         if (Model.whoseturn == "player") {
             Controller.activate_treasures("scramble");
             Model.whoseturn = "enemy";
@@ -688,31 +702,28 @@ var Controller = {
             setTimeout(() => { Controller.enemy_attack_sequence(); }, 1000);
         }
     },
-    respond_to_skipturn: function () {
+    
+    respond_to_skipturn: function() {
         if (Model.whoseturn == "player") {
             Model.whoseturn = "enemy";
             View.show_grid_blocker();
             setTimeout(() => { Controller.enemy_attack_sequence(); }, 1000);
         }
     },
-    respond_to_drinkpotion: function (potion) {
-        if (Model.whoseturn == "player") {
-            if (potion == "regenerate") {
+
+    respond_to_drinkpotion: function(potion) {
+        if (Model.whoseturn=="player") {
+            if (potion=="regenerate") {
                 old_player_health = Model.player.hp;
-                if (Model.player.full_hp - Model.player.hp > 5) {
-                    Model.player.hp += 5;
-                }
-                else {
-                    Model.player.hp = Model.player.full_hp;
-                }
+                if (Model.player.full_hp-Model.player.hp > 5) { Model.player.hp += 5; } else { Model.player.hp = Model.player.full_hp; }
                 View.refresh_player_health(Model.player, old_player_health);
             }
-            if (potion == "powerup") {
+            if (potion=="powerup") {
                 Model.player.special.powerup += 1;
                 Model.player.special.powerdown = 0;
                 View.refresh_player_effects(Model.player);
             }
-            if (potion == "purify") {
+            if (potion=="purify") {
                 Model.tiles.purify_tiles();
                 var sp = Model.player.special;
                 Model.purify_player_effects();
@@ -724,22 +735,18 @@ var Controller = {
             this.make_potions_functional();
         }
     },
-    make_potions_functional: function () {
+
+    make_potions_functional: function() {
         var nnel = View.render_potions(Model.player);
         var reg = document.getElementById("regenerate_potion_clicker");
         var pwu = document.getElementById("powerup_potion_clicker");
         var pur = document.getElementById("purify_potion_clicker");
-        if (nnel.regenerate) {
-            reg.addEventListener("click", () => this.respond_to_drinkpotion("regenerate"));
-        }
-        if (nnel.powerup) {
-            pwu.addEventListener("click", () => this.respond_to_drinkpotion("powerup"));
-        }
-        if (nnel.purify) {
-            pur.addEventListener("click", () => this.respond_to_drinkpotion("purify"));
-        }
+        if (nnel.regenerate) { reg.addEventListener("click",() => this.respond_to_drinkpotion("regenerate")); }
+        if (nnel.powerup) { pwu.addEventListener("click",() => this.respond_to_drinkpotion("powerup")); }
+        if (nnel.purify) { pur.addEventListener("click",() => this.respond_to_drinkpotion("purify")); }
     },
-    make_grid_functional: function () {
+
+    make_grid_functional: function() {
         var clickable_tiles = document.getElementsByClassName("grid");
         for (var i = 0; i < clickable_tiles.length; i++) {
             clickable_tiles[i].addEventListener('click', this.respond_to_tile_click);
@@ -749,12 +756,13 @@ var Controller = {
         document.getElementById("scramble").addEventListener('click', this.respond_to_scramble);
         document.getElementById("block_grid").addEventListener('click', this.respond_to_skipturn);
     },
-    checkword: function (word) {
-        const xhr = new XMLHttpRequest(), method = "GET", url = "/checkword/" + word;
+    
+    checkword: function(word) {
+        const xhr = new XMLHttpRequest(), method = "GET", url = "/checkword/"+word;
         xhr.open(method, url, true);
         _this = this;
         xhr.onreadystatechange = function () {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
+            if(xhr.readyState === XMLHttpRequest.DONE) {
                 var status = xhr.status;
                 if (status === 0 || (status >= 200 && status < 400)) {
                     if (xhr.responseText == 't') {
@@ -765,44 +773,41 @@ var Controller = {
         };
         xhr.send();
     },
-    special_checkword: function (word, category, executeme) {
-        const xhr = new XMLHttpRequest(), method = "GET", url = "/specialword/" + category + "/" + word;
+
+    special_checkword: function(word, category, executeme) {
+        const xhr = new XMLHttpRequest(), method = "GET", url = "/specialword/"+category+"/"+word;
         xhr.open(method, url, true);
         _this = this;
         xhr.onreadystatechange = function () {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
+            if(xhr.readyState === XMLHttpRequest.DONE) {
                 var status = xhr.status;
                 if (status === 0 || (status >= 200 && status < 400)) {
-                    if (xhr.responseText == 't' && executeme) {
-                        executeme();
-                    }
+                    if (xhr.responseText == 't' && executeme) { executeme(); }
                 }
             }
         };
         xhr.send();
     },
-    activate_treasures: function (triggertype) {
-        for (var i in Model.player.treasures) {
-            if (Model.player.treasures[i].triggertype == triggertype) {
-                treasure_library[Model.player.treasures[i].id].whentriggered(Number(i) + 1);
-            }
+
+    activate_treasures: function(triggertype) {
+        for (var i in Model.player.treasures) { 
+            if (Model.player.treasures[i].triggertype==triggertype) { treasure_library[Model.player.treasures[i].id].whentriggered(Number(i)+1) }
         }
     },
-    player_attack_sequence: function () {
+
+    player_attack_sequence: function() {
         Model.whoseturn = "enemy";
         var word_tiles = Model.tiles.selected_tiles;
         var old_enemy_hp = Model.enemy.hp;
         var old_player_hp = Model.player.hp;
         this.activate_treasures("submitword");
-        var word_power = Model.word_power(word_tiles);
+        var word_power = Model.word_power(word_tiles)
         if (Model.player.special.powerup != 0 && Model.player.special.powerdown == 0) {
-            Model.enemy.smart_health_decrement(1.5 * word_power);
-        }
-        else if (Model.player.special.powerup == 0 && Model.player.special.powerdown != 0) {
-            Model.enemy.smart_health_decrement(word_power / 2);
-        }
-        else {
-            Model.enemy.smart_health_decrement(word_power);
+            Model.enemy.smart_health_decrement(1.5*word_power);
+        } else if (Model.player.special.powerup == 0 && Model.player.special.powerdown != 0) {
+            Model.enemy.smart_health_decrement(word_power/2);
+        } else {
+            Model.enemy.smart_health_decrement(word_power)
         }
         View.refresh_enemy_health(Model.enemy, old_enemy_hp);
         View.refresh_enemy_effects(Model.enemy);
@@ -812,72 +817,67 @@ var Controller = {
         View.refresh_player_effects(Model.player);
         View.refresh_grid(Model.tiles.grid_tiles);
         View.render_potions(Model.player);
-        if (Model.enemy.hp == 0) {
-            this.enemy_defeated();
-        }
-        else {
+        if (Model.enemy.hp == 0) { 
+            this.enemy_defeated(); 
+        } else {
             setTimeout(() => { this.enemy_attack_sequence(); }, 4000);
-        }
-        // note to self: setTimeout changes the referent of "this" to the global object, unless you do it in this funny way with () => smth
+        }    
+    // note to self: setTimeout changes the referent of "this" to the global object, unless you do it in this funny way with () => smth
     },
-    enemy_special_effects: function (attack) {
-        // regeneration    
+    
+    enemy_special_effects: function(attack) {
+// regeneration    
         if (attack.effects.regenerate != 0) {
             old_hp = Model.enemy.hp;
             if (Model.enemy.full_hp - Model.enemy.hp > attack.effects.regenerate) {
                 Model.enemy.hp += attack.effects.regenerate;
-            }
-            else {
+            } else {
                 Model.enemy.hp = Model.enemy.full_hp;
             }
             View.refresh_enemy_health(Model.enemy, old_hp);
         }
-        // powerup
-        if (Model.enemy.special.powerup != 0) {
-            Model.enemy.special.powerdown = 0;
-        }
+// powerup
+        if (Model.enemy.special.powerup != 0) { Model.enemy.special.powerdown = 0; }
         Model.enemy.special.powerup += attack.effects.powerup;
-        // negative player effects        
+// negative player effects        
         if (Model.player.special.shielded == 0) {
             // powerdown
-            if (Model.enemy.special.powerdown != 0) {
-                Model.player.special.powerup = 0;
-            }
-            Model.player.special.powerdown += attack.effects.powerdown;
+                if (Model.enemy.special.powerdown != 0) { Model.player.special.powerup = 0; }
+                Model.player.special.powerdown += attack.effects.powerdown;
             // poison
-            Model.player.special.poison += attack.effects.poison;
+                Model.player.special.poison += attack.effects.poison;
             // bleed
-            Model.player.special.bleed += attack.effects.bleed;
+                Model.player.special.bleed += attack.effects.bleed;
             //burn
-            Model.player.special.burn += attack.effects.burn;
+                Model.player.special.burn += attack.effects.burn;
             // tilesmash
-            for (var i = 0; i < attack.effects.tilesmash; i++) {
-                Model.tiles.afflict_tile("smashed");
-            }
+                for (var i = 0; i < attack.effects.tilesmash; i++) {
+                    Model.tiles.afflict_tile("smashed");
+                }
             // tileplague
-            for (var i = 0; i < attack.effects.tileplague; i++) {
-                Model.tiles.afflict_tile("plague");
-            }
+                for (var i = 0; i < attack.effects.tileplague; i++) {
+                    Model.tiles.afflict_tile("plague");
+                }
             // tilealter
-            for (var i = 0; i < attack.effects.tilealter; i++) {
-                var whichtile = Model.tiles.alter_tile();
-                View.tile_animation(whichtile, "tileblur 2s", Model.tiles.grid_tiles);
-            }
+                for (var i = 0; i < attack.effects.tilealter; i++) {
+                    var whichtile = Model.tiles.alter_tile();
+                    View.tile_animation(whichtile, "tileblur 2s", Model.tiles.grid_tiles)
+                }
             // tilesteal
-            for (var i = 0; i < attack.effects.tilesteal; i++) {
-                Model.tiles.afflict_tile("tilesteal");
-            }
+                for (var i = 0; i < attack.effects.tilesteal; i++) {
+                    Model.tiles.afflict_tile("tilesteal");
+                }
             // stun
-            if (Model.player.special.stun > 0) {
-                Model.player.special.stun += -1;
-            }
-            Model.player.special.stun += attack.effects.stun;
-        }
+                if (Model.player.special.stun > 0) { Model.player.special.stun += -1 }
+                Model.player.special.stun += attack.effects.stun;
+        }       
+
         View.refresh_player_effects(Model.player);
         View.refresh_enemy_effects(Model.enemy);
         View.refresh_grid(Model.tiles.grid_tiles);
     },
-    enemy_attack_sequence: function () {
+    
+    enemy_attack_sequence: function() {
         if (Model.enemy.special.freeze == 0) {
             attacks = Model.enemy.attacks;
             attack_weights = [];
@@ -891,17 +891,15 @@ var Controller = {
             old_player_hp = Model.player.hp;
             if (Model.player.special.shielded == 0) {
                 if (Model.enemy.special.powerup != 0 && Model.enemy.special.powerdown == 0) {
-                    Model.player.smart_health_decrement(1.5 * chosen_attack.damage);
-                }
-                else if (Model.enemy.special.powerup == 0 && Model.enemy.special.powerdown != 0) {
-                    Model.player.smart_health_decrement(chosen_attack.damage / 2);
-                }
-                else {
-                    Model.player.smart_health_decrement(chosen_attack.damage);
+                    Model.player.smart_health_decrement(1.5*chosen_attack.damage);
+                } else if (Model.enemy.special.powerup == 0 && Model.enemy.special.powerdown != 0) {
+                    Model.player.smart_health_decrement(chosen_attack.damage/2);
+                } else {
+                    Model.player.smart_health_decrement(chosen_attack.damage)
                 }
                 this.enemy_special_effects(chosen_attack);
             }
-            // this line (below) can interfere with enemy regeneration, if not handled carefully
+// this line (below) can interfere with enemy regeneration, if not handled carefully
             View.refresh_player_health(Model.player, old_player_hp);
             if (Model.player.hp == 0) {
                 this.player_death();
@@ -909,44 +907,30 @@ var Controller = {
         }
         setTimeout(() => { this.special_effect_phase(); }, 2700);
     },
-    special_effect_phase: function () {
+    
+    special_effect_phase: function() {
         var p_old_health = Model.player.hp;
         var e_old_health = Model.enemy.hp;
-        // tileplague spread
+// tileplague spread
         num_plagued = 0;
         for (var i in Model.tiles.grid_tiles) {
-            if (Model.tiles.grid_tiles[i].status == "plague") {
-                num_plagued++;
-            }
+            if (Model.tiles.grid_tiles[i].status == "plague") { num_plagued++; }
         }
         for (var i = 0; i < num_plagued; i++) {
             Model.tiles.afflict_tile("plague");
         }
-        // poison
-        if (Model.player.special.poison > 0 && Model.player.special.shielded == 0) {
-            Model.player.smart_health_decrement(2);
-        }
-        if (Model.enemy.special.poison > 0) {
-            Model.enemy.smart_health_decrement(2);
-        }
-        // bleed
-        if (Model.player.special.bleed > 0 && Model.player.special.shielded == 0) {
-            Model.player.smart_health_decrement(1);
-        }
-        if (Model.enemy.special.bleed > 0) {
-            Model.enemy.smart_health_decrement(1);
-        }
-        //burn
-        if (Model.player.special.burn > 0 && Model.player.special.shielded == 0) {
-            Model.player.smart_health_decrement(3);
-        }
-        if (Model.enemy.special.burn > 0) {
-            Model.enemy.smart_health_decrement(3);
-        }
-        //stun
-        if (Model.player.special.stun > 0) {
-            View.show_grid_blocker("#ffff99", "STUNNED! Click to continue.");
-        }
+// poison
+        if (Model.player.special.poison > 0 && Model.player.special.shielded == 0) { Model.player.smart_health_decrement(2); }
+        if (Model.enemy.special.poison > 0) { Model.enemy.smart_health_decrement(2); }
+// bleed
+        if (Model.player.special.bleed > 0 && Model.player.special.shielded == 0) { Model.player.smart_health_decrement(1); }
+        if (Model.enemy.special.bleed > 0) { Model.enemy.smart_health_decrement(1); }
+//burn
+        if (Model.player.special.burn > 0 && Model.player.special.shielded == 0) { Model.player.smart_health_decrement(3); }
+        if (Model.enemy.special.burn > 0) { Model.enemy.smart_health_decrement(3); }
+//stun
+        if (Model.player.special.stun > 0) { View.show_grid_blocker("#ffff99","STUNNED! Click to continue."); }
+        
         Model.decrement_effects();
         View.refresh_grid(Model.tiles.grid_tiles);
         View.refresh_player_effects(Model.player);
@@ -955,36 +939,26 @@ var Controller = {
         View.refresh_enemy_health(Model.enemy, e_old_health);
         if (p_old_health == Model.player.hp && e_old_health == Model.enemy.hp) {
             Model.whoseturn = "player";
-        }
-        else {
-            if (Model.enemy.hp == 0) {
-                this.enemy_defeated();
-            }
-            if (Model.player.hp == 0) {
-                this.player_death();
-            }
+        } else {
+            if (Model.enemy.hp == 0) { this.enemy_defeated(); }
+            if (Model.player.hp == 0) { this.player_death(); }
             setTimeout(() => { Model.whoseturn = "player"; }, 2700);
         }
     },
-    player_death: function () {
+
+    player_death: function() {
         Savefile.death_overwrite();
         Savefile.save_changes();
-        setTimeout(() => { window.location.replace("/page/youdied"); }, 2700);
+        setTimeout(() => { window.location.replace("/page/youdied"); }, 2700)
     },
-    enemy_defeated: function () {
+    
+    enemy_defeated: function() {
         var waittime = 2700;
         clearInterval(Model.enemy.quip_interval_id);
         document.getElementById("enemy_speechbubble").style.display = "none";
-        if (Model.enemy.ondeath) {
-            Model.enemy.ondeath();
-        }
+        if (Model.enemy.ondeath) { Model.enemy.ondeath(); }
         var ptn_probs = "";
-        if (Model.enemy.id.slice(-1) == "5") {
-            ptn_probs = Model.stats.boss_potion_probs;
-        }
-        else {
-            ptn_probs = Model.stats.normal_potion_probs;
-        }
+        if (Model.enemy.id.slice(-1)=="5") { ptn_probs=Model.stats.boss_potion_probs; } else { ptn_probs=Model.stats.normal_potion_probs; }
         Model.player.get_random_potion(ptn_probs);
         View.enemy_fade();
         var overkill_msg = largestUnder(Model.stats.overkill_messages, Model.enemy.overkill);
@@ -1007,25 +981,24 @@ var Controller = {
         Model.enemy.reset_enemy_effects();
         this.pack_savefile();
         if (finishpage) {
-            if (finishpage == "endofdemo") {
-                Savefile.change_this_savefile({ hardcore: 1 });
+            if (finishpage == "endofdemo") { 
+                Savefile.change_this_savefile({hardcore:1}); 
                 Savefile.set_death_checkpoint();
-                Savefile.save_changes();
+                Savefile.save_changes(); 
             }
-            setTimeout(() => { window.location.replace("/page/" + finishpage); }, waittime);
-        }
-        else if (Model.enemy.id.slice(-1) == "1") {
+            setTimeout(() => { window.location.replace("/page/"+finishpage); }, waittime);
+        } else if (Model.enemy.id.slice(-1) == "1") {
             setTimeout(() => { window.location.replace("/page/map"); }, waittime);
-        }
-        else {
+        }    else {
             setTimeout(() => { this.next_enemy(); }, waittime);
+
         }
+
     },
-    next_enemy: function () {
+
+    next_enemy: function() {
         Model.initialize();
-        if (Model.player.hardcore == 0) {
-            Model.player.reset_player_effects();
-        }
+        if (Model.player.hardcore == 0) { Model.player.reset_player_effects(); }
         Model.tiles.purify_tiles();
         this.pack_savefile();
         View.refresh_enemy_effects(Model.enemy);
@@ -1038,39 +1011,22 @@ var Controller = {
         View.show_grid_blocker();
         View.set_name_tags(Model.player.name, Model.enemy.name);
         View.refresh_enemy_health(Model.enemy, Model.enemy.full_hp);
-        if (Model.player.hardcore == 0) {
-            View.refresh_player_health(Model.player, Model.player.full_hp);
-        }
-        if (Model.enemy.onapproach) {
-            setTimeout(() => { Model.enemy.onapproach(); }, 1000);
-        }
+        if (Model.player.hardcore == 0) { View.refresh_player_health(Model.player, Model.player.full_hp); }
+        if (Model.enemy.onapproach) { setTimeout(() => { Model.enemy.onapproach(); }, 1000); }
     },
-    unpack_savefile: function () {
+
+    unpack_savefile: function() {
         Savefile.retrieve_savefile();
         var svf = Savefile.this_savefile;
-        if (svf.grid_tiles) {
-            Model.tiles.grid_tiles = svf.grid_tiles;
-        }
-        if (svf.potions) {
-            Model.player.potions = svf.potions;
-        }
-        if (svf.hp) {
-            Model.player.full_hp = svf.hp;
-        }
-        if (svf.next_enemy) {
-            for (var i in enemy_library[svf.next_enemy]) {
-                Model.enemy[i] = enemy_library[svf.next_enemy][i];
-            }
-        }
-        if (svf.treasures) {
-            Model.player.treasures = svf.treasures;
-        }
-        if (svf.hardcore) {
-            Model.player.hardcore = 1;
-            Model.player.hp = svf.hardcore_hp;
-        }
+        if (svf.grid_tiles) { Model.tiles.grid_tiles = svf.grid_tiles; }
+        if (svf.potions) { Model.player.potions = svf.potions; }
+        if (svf.hp) { Model.player.full_hp = svf.hp; }
+        if (svf.next_enemy) { for (var i in enemy_library[svf.next_enemy]) { Model.enemy[i] = enemy_library[svf.next_enemy][i]; } }
+        if (svf.treasures) { Model.player.treasures = svf.treasures; }
+        if (svf.hardcore) { Model.player.hardcore = 1; Model.player.hp = svf.hardcore_hp; }
     },
-    pack_savefile: function () {
+
+    pack_savefile: function() {
         sf_updates = {
             grid_tiles: Model.tiles.grid_tiles,
             potions: Model.player.potions,
@@ -1079,22 +1035,18 @@ var Controller = {
             treasures: Model.player.treasures,
             hardcore: Model.player.hardcore,
             hardcore_hp: Model.player.hp
-        };
+        }
         Savefile.change_this_savefile(deepClone(sf_updates));
         Savefile.save_changes();
     },
-    initialize: function () {
+    
+    initialize: function() {
         this.unpack_savefile();
-        if (Model.enemy.id.slice(-1) == "1" && Model.player.hardcore == 0) {
-            Savefile.set_death_checkpoint();
-            Savefile.save_changes();
-        }
+        if (Model.enemy.id.slice(-1) == "1" && Model.player.hardcore == 0) { Savefile.set_death_checkpoint(); Savefile.save_changes(); } 
         Model.initialize();
         this.make_potions_functional();
         Model.tiles.purify_tiles();
-        if (Model.player.hardcore == 1) {
-            document.getElementById("player_img").src = "/img/lex_badass.png";
-        }
+        if (Model.player.hardcore == 1) { document.getElementById("player_img").src="/img/lex_badass.png"; }
         View.render_treasures(Model.player);
         View.set_enemy_image(Model.enemy);
         Model.enemy.quip_interval_id = View.display_enemy_quips(Model.enemy);
@@ -1107,9 +1059,7 @@ var Controller = {
         View.refresh_enemy_health(Model.enemy, Model.enemy.hp);
         View.make_dialogue_functional();
         this.make_grid_functional();
-        if (Model.enemy.onapproach) {
-            setTimeout(() => { Model.enemy.onapproach(); }, 1000);
-        }
+        if (Model.enemy.onapproach) { setTimeout(() => { Model.enemy.onapproach(); }, 1000); }
     }
-};
-//# sourceMappingURL=battle.js.map
+
+}
