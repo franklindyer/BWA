@@ -329,20 +329,7 @@ var View = {
         help_div.innerHTML = helptext;
     },
 
-    tile_helptexts: {
-        normal: "",
-// gem tiles
-        amethyst: "Amethyst tile: poisons enemy.",
-        emerald: "Emerald tile: regenerates 5 hp.",
-        garnet: "Garnet tile: powers enemy down.",
-        sapphire: "Sapphire tile: freezes enemy.",
-        ruby: "Ruby tile: burns enemy.",
-        crystal: "Crystal tile: purifies and shields Lex.",
-        diamond: "Diamond tile: restores full health and awards potions.",
-// tile ailments
-        smashed: "Smashed tile: deals no damage.",
-        plague: "Plagued tile: deals no damage and spreads."
-    },
+    tile_helptexts: tile_helptexts,
 
     set_name_tags: function(pname, ename) {
         var player_tag = document.getElementById("player_name");
@@ -447,18 +434,7 @@ var View = {
         setTimeout(() => { treasure_box.style.borderColor = "#804000"; }, 2000);
     },
     
-    tile_colors: {
-        normal: "linear-gradient(to bottom right, #ffd9b3, #ffd9b3)",
-        smashed: "linear-gradient(to bottom right, #cccccc, #cccccc)",
-        plague: "repeating-linear-gradient(45deg, #ffd9b3, #ffd9b3 7px, #86b300 7px, #86b300 14px)",
-        amethyst: "linear-gradient(to bottom right, #cc00cc, #ffccff)",
-        emerald: "linear-gradient(to bottom right, #b3ffb3, #33cc00)",
-        garnet: "linear-gradient(to bottom right, #ffcc66, #ff6600)",
-        sapphire: "linear-gradient(to bottom right, #b3e6ff, #0077b3)",
-        ruby: "linear-gradient(to bottom right, #ff9980, #ff3300)",
-        crystal: "linear-gradient(to bottom right, #ffccff, #ff6699)",
-        diamond: "linear-gradient(to bottom right, #66ffff, #a6a6a6)"
-    },
+    tile_colors: tile_colors,
 
     refresh_grid: function(grid_tiles, selected_tiles) {
         var tile_style = this.tile_colors;
