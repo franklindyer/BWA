@@ -419,3 +419,7 @@ Much obliged!
 ## Credits
 
 So far (as of July 8, 2002), I have been the sole programmer of BWA. I've also drawn all of the background illustrations and some of the character art. My sister Ada drew most of the character art.
+
+## License
+
+Original artwork is CC-BY-SA-4.0. Codebase is AGPL-3.0.
