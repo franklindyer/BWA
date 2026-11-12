@@ -2,7 +2,7 @@
 
 Bookworm Adventures is a word-forming combat-based RPG videogame, created originally by PopCap games. During my childhood, I spent a lot of time playing Bookworm Adventures, obsessing over its quirky characters, and wishing I could add my own characters, levels, and mechanics to the game. Unfortunately, BWA was never a *very* popular game. It eventually fell out of support, and there never was a version of the game playable on Mac or iOS. The only way I've been able to play BWA in the past few years has been through a glitchy, ad-ridden online version that didn't save progress. Yuck.
 
-Since Bookworm Adventures was such a big part of my childhood, I decided to try rebuilding a playable version of it in the browser. You can play a Beta version of the game at [this link](https://bwa.franklin.dyer.me). 
+Since Bookworm Adventures was such a big part of my childhood, I decided to try rebuilding a playable version of it in the browser. You can play a Beta version of the game at [this link](https://bwa.narfnilk.com). 
 
 I've done my best to reconstruct the original game's playful vibes through the artwork, dialogue and flavor text. It currently has no *plot* - it's just just RPG-style combat for its own sake, without any princesses to save or big baddies to hunt down. It happens that as I've gotten older, my appetite for inventing fantasy storylines has been greatly diminished, and I now find the back-end code and game mechanics more interesting than the superficial decoration. Feel free to suggest any plotline ideas you may come up with, but in my opinion, the game does not urgently need a plot.
 
