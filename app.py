@@ -1,5 +1,4 @@
 from flask import Flask, redirect, make_response, request, render_template, send_from_directory
-from flask_mail import Mail, Message
 from flask_minify import minify
 import random, string
 

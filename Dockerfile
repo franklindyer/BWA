@@ -2,7 +2,7 @@ FROM ubuntu:latest
 
 RUN apt-get update -y && apt-get install -y python3 pip python3-venv
 RUN python3 -m venv /venv
-RUN /venv/bin/python3 -m pip install flask flask_socketio flask_minify flask_mail waitress 
+RUN /venv/bin/python3 -m pip install flask flask_socketio flask_minify waitress 
 ENV PATH="/venv/bin:$PATH"
 
 RUN mkdir /app
