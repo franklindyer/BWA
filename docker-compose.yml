@@ -1,0 +1,6 @@
+services:
+    bwa-server:
+        build:
+            context: .
+        ports:
+            - 0.0.0.0:5071:5001

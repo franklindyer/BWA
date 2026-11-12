@@ -49,6 +49,6 @@ def check_specialword(path,word):
     else:
         return 'f';
 
-if __name__ == '__main__':
-	app.run(debug=True, use_reloader=False, port=3001)
-
+# if __name__ == '__main__':
+	# app.run(debug=True, use_reloader=False, port=3001)
+app.run(host='0.0.0.0', port=5001)
